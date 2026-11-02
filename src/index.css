@@ -111,3 +111,18 @@ a { color: inherit; text-decoration: none; }
 @media (min-width: 1025px) {
   .two-col { grid-template-columns: 340px 1fr; }
 }
+
+/* 재고 */
+.stack { display: flex; flex-direction: column; gap: 16px; }
+.inline { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
+.inline .input { width: auto; }
+.count-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+.count-grid label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--muted); }
+.list.plain .list-row.compact { border: none; padding: 8px 0; border-bottom: 1px solid var(--border); border-radius: 0; }
+.table-wrap { overflow-x: auto; }
+.table { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 14px; }
+.table th, .table td { padding: 8px 6px; text-align: right; border-bottom: 1px solid var(--border); white-space: nowrap; }
+.table th:first-child, .table td:first-child { text-align: left; }
+.table th { color: var(--muted); font-weight: 600; font-size: 12px; }
+.table tr.low td { background: #fdf1ef; }
+.tag.danger { background: #fbe1dd; color: var(--danger); margin-left: 6px; }
