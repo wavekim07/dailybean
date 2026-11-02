@@ -147,3 +147,23 @@ a { color: inherit; text-decoration: none; }
 .tag.slow { background: #fbeadb; color: #b5651d; }
 .tag.ok { background: #e3f4e6; color: #2d7a3e; }
 .filters { margin-bottom: 8px; padding: 12px 16px; }
+
+/* 매출 */
+.total-preview { font-size: 15px; }
+.tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+.tab { font: inherit; font-size: 13px; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); cursor: pointer; color: var(--muted); }
+.tab.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+.stats .big { font-size: 22px; }
+.chart { margin-top: 8px; }
+.grid.half { grid-template-columns: 1fr; }
+@media (min-width: 769px) {
+  .grid.stats { grid-template-columns: repeat(3, 1fr); }
+  .grid.half { grid-template-columns: 1fr 1fr; }
+}
+@media (min-width: 1025px) {
+  .two-col.wide-right { grid-template-columns: 340px 1fr; }
+}
+.list-row > .actions { flex-wrap: nowrap; flex-shrink: 0; }
+.grid.stats { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.grid.stats .card { padding: 12px; }
+@media (max-width: 768px) { .stats .big { font-size: 15px; } .stats h2 { font-size: 12px; } }
