@@ -1,0 +1,68 @@
+:root {
+  --bg: #faf7f2;
+  --surface: #ffffff;
+  --text: #2b2118;
+  --muted: #7a6a5c;
+  --primary: #6f4e37;
+  --primary-soft: #efe6dc;
+  --border: #e6ddd2;
+  --danger: #c0392b;
+  --nav-h: 64px;
+  font-family: 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, sans-serif;
+  color: var(--text);
+  background: var(--bg);
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); }
+h1, h2, p { margin: 0; }
+a { color: inherit; text-decoration: none; }
+
+/* 모바일 기본: 아래쪽 탭 메뉴 */
+.layout { min-height: 100vh; }
+.content { padding: 16px 16px calc(var(--nav-h) + 16px); max-width: 1100px; margin: 0 auto; }
+
+.navbar {
+  position: fixed; bottom: 0; left: 0; right: 0; height: var(--nav-h);
+  background: var(--surface); border-top: 1px solid var(--border); z-index: 10;
+}
+.navbar .brand { display: none; }
+.menu { list-style: none; margin: 0; padding: 0; display: flex; height: 100%; }
+.menu li { flex: 1; }
+.menu a {
+  height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 2px; font-size: 11px; color: var(--muted);
+}
+.menu a .icon { font-size: 18px; }
+.menu a.active { color: var(--primary); font-weight: 700; }
+
+.page-header { margin-bottom: 16px; }
+.page-header h1 { font-size: 22px; }
+.page-header p { color: var(--muted); margin-top: 4px; font-size: 14px; }
+
+.grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+.card h2 { font-size: 14px; color: var(--muted); font-weight: 600; }
+.card .big { font-size: 32px; font-weight: 800; color: var(--primary); margin-top: 6px; }
+.muted { color: var(--muted); font-size: 13px; }
+.placeholder { color: var(--muted); text-align: center; padding: 40px 16px; }
+
+/* 태블릿 */
+@media (min-width: 769px) {
+  .grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* PC: 왼쪽 사이드바 */
+@media (min-width: 1025px) {
+  .layout { display: flex; }
+  .navbar {
+    position: sticky; top: 0; height: 100vh; width: 200px; flex-shrink: 0;
+    border-top: none; border-right: 1px solid var(--border); padding: 24px 12px;
+  }
+  .navbar .brand { display: block; font-size: 22px; font-weight: 800; color: var(--primary); padding: 0 12px 24px; }
+  .menu { flex-direction: column; height: auto; gap: 4px; }
+  .menu a { flex-direction: row; justify-content: flex-start; gap: 10px; padding: 10px 12px; border-radius: 8px; font-size: 15px; }
+  .menu a.active { background: var(--primary-soft); }
+  .content { flex: 1; padding: 32px; }
+  .grid { grid-template-columns: repeat(3, 1fr); }
+}
