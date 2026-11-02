@@ -64,3 +64,15 @@ export function weatherText(code) {
 }
 
 export const isRainy = (code) => code >= 51 && code !== 71 && code !== 73 && code !== 75 && code !== 77 && code !== 85 && code !== 86
+
+// 도시 검색 (Open-Meteo 지오코딩)
+export async function searchCity(name, signal) {
+  const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(name)}&count=5&language=ko&format=json`
+  const data = await getJson(url, signal)
+  return (data.results || []).map((r) => ({
+    name: r.name,
+    detail: [r.admin1, r.country].filter(Boolean).join(', '),
+    lat: Math.round(r.latitude * 1000) / 1000,
+    lon: Math.round(r.longitude * 1000) / 1000,
+  }))
+}

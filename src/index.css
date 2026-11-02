@@ -178,3 +178,13 @@ a { color: inherit; text-decoration: none; }
 .progress-wrap { display: flex; flex-direction: column; gap: 4px; }
 .row > .input { flex: 1; }
 @media (max-width: 1024px) { .search-col { order: -1; } }
+
+/* 대시보드 */
+.dash { display: grid; grid-template-columns: 1fr; gap: 16px; align-items: start; }
+.link { font-size: 13px; color: var(--primary); }
+.ok-text { color: #2d7a3e; font-size: 14px; margin-top: 8px; }
+.sales-sum { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+.sales-sum div { display: flex; flex-direction: column; gap: 2px; }
+.sales-sum strong { font-size: 20px; color: var(--primary); }
+@media (min-width: 769px) { .dash { grid-template-columns: 1fr 1fr; } }
+.notice { background: #e3f4e6; color: #2d7a3e; border-radius: 8px; padding: 8px 12px; margin-bottom: 12px; font-size: 14px; }
