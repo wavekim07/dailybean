@@ -1,11 +1,12 @@
 import { initialState } from './initialState.js'
+import { toDateStr } from '../utils/date.js'
 
 export const newId = () =>
   typeof crypto !== 'undefined' && crypto.randomUUID
     ? crypto.randomUUID()
     : `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
 
-const today = () => new Date().toISOString().slice(0, 10)
+const today = () => toDateStr() // 로컬(한국) 날짜. toISOString은 UTC라 오전 9시 전에 하루 밀림
 
 // 배열 CRUD 공통 처리
 const add = (list, data) => [...list, { id: newId(), ...data }]
