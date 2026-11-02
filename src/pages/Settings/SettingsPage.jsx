@@ -106,6 +106,21 @@ function RewardSetting({ value, onSave }) {
   )
 }
 
+function StockSetting({ value, onSave }) {
+  const [v, setV] = useState(String(Math.round(value * 100)))
+  const [msg, setMsg] = useState('')
+  return (
+    <form className="card form" onSubmit={(e) => { e.preventDefault(); const n = Number(v); if (!n || n <= 0 || n >= 100) return setMsg('1~99 사이로 입력해 주세요.'); onSave(n / 100) }}>
+      <h2>재고 부족 경고 기준</h2>
+      <div className="row">
+        <input className="input" inputMode="numeric" value={v} onChange={(e) => { setV(e.target.value.replace(/\D/g, '')); setMsg('') }} />
+        <button className="btn primary" type="submit">저장</button>
+      </div>
+      <p className="muted">{msg || `기본 발주량에서 ${v || '?'}% 이상 줄면(남은 양 ${100 - Number(v || 0)}% 이하) 빨간색 경고`}</p>
+    </form>
+  )
+}
+
 function BackupPanel({ state, dispatch }) {
   const fileRef = useRef(null)
   const [msg, setMsg] = useState('')
@@ -172,6 +187,7 @@ export default function SettingsPage() {
       <div className="grid half">
         <LocationSetting location={settings.location} onSave={(location) => save({ location }, `매장 위치를 ${location.name}(으)로 바꿨어요.`)} />
         <RewardSetting key={settings.rewardThreshold} value={settings.rewardThreshold} onSave={(rewardThreshold) => save({ rewardThreshold }, '쿠폰 기준을 저장했어요.')} />
+        <StockSetting key={settings.shortageRate} value={settings.shortageRate} onSave={(shortageRate) => save({ shortageRate }, '재고 부족 경고 기준을 저장했어요.')} />
         <GrindSetting key={JSON.stringify(settings.grind)} grind={settings.grind} onSave={(grind) => save({ grind }, '분쇄도 기준값을 저장했어요. 추천값에 바로 반영돼요.')} />
         <BackupPanel state={state} dispatch={dispatch} />
       </div>

@@ -3,20 +3,29 @@
 
 const sum = (arr) => arr.reduce((s, x) => s + Number(x.qty), 0)
 
+// 기본 발주량 (예전 데이터의 minQty도 호환)
+export const orderQtyOf = (item) => Number(item.orderQty ?? item.minQty ?? 0)
+
+// 발주량 대비 남은 비율
+export const remainRate = (item, qty) => (orderQtyOf(item) > 0 ? qty / orderQtyOf(item) : 1)
+
+// 부족 경고: 발주량에서 shortageRate(기본 70%) 이상 줄었으면 = 남은 양이 30% 이하
+export const isLow = (item, qty, shortageRate = 0.7) => orderQtyOf(item) > 0 && qty <= orderQtyOf(item) * (1 - shortageRate)
+
 export function lastCountBefore(counts, itemId, date) {
   return counts
     .filter((c) => c.itemId === itemId && c.date < date)
     .sort((a, b) => b.date.localeCompare(a.date))[0] || null
 }
 
-export function usageRows(items, stockIns, counts, date) {
+export function usageRows(items, stockIns, counts, date, shortageRate) {
   return items.map((item) => {
     const prev = lastCountBefore(counts, item.id, date)
     // 전날 실사 이후부터 오늘까지의 입고를 합산 (실사를 하루 빠뜨려도 맞게)
     const ins = sum(stockIns.filter((s) => s.itemId === item.id && s.date <= date && (!prev || s.date > prev.date)))
     const today = counts.find((c) => c.itemId === item.id && c.date === date)
     const usage = prev && today ? prev.qty + ins - today.qty : null
-    const low = today ? today.qty < item.minQty : false
+    const low = today ? isLow(item, today.qty, shortageRate) : false
     return { item, prevQty: prev?.qty ?? null, prevDate: prev?.date ?? null, ins, todayQty: today?.qty ?? null, usage, low }
   })
 }
@@ -28,8 +37,8 @@ export function currentStock(item, stockIns, counts) {
   return (last ? last.qty : 0) + ins
 }
 
-export function lowStockItems(items, stockIns, counts) {
+export function lowStockItems(items, stockIns, counts, shortageRate) {
   return items
     .map((item) => ({ item, qty: currentStock(item, stockIns, counts) }))
-    .filter(({ item, qty }) => qty < item.minQty)
+    .filter(({ item, qty }) => isLow(item, qty, shortageRate))
 }

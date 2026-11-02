@@ -5,7 +5,7 @@ import WeatherCard from '../../components/grind/WeatherCard.jsx'
 import GrindRecommendCard from '../../components/grind/GrindRecommendCard.jsx'
 import { useApp } from '../../context/AppContext.jsx'
 import useGrindRecommendation from '../../hooks/useGrindRecommendation.js'
-import { lowStockItems } from '../../utils/stockCalc.js'
+import { lowStockItems, orderQtyOf } from '../../utils/stockCalc.js'
 import { groupSales, summarize, total } from '../../utils/salesStats.js'
 import { toDateStr } from '../../utils/date.js'
 import { won } from '../../utils/format.js'
@@ -19,7 +19,7 @@ export default function Dashboard() {
   const activeBeanId = beanId ?? beans[0]?.id ?? null
   const rec = useGrindRecommendation(activeBeanId)
 
-  const low = lowStockItems(items, stockIns, counts)
+  const low = lowStockItems(items, stockIns, counts, settings.shortageRate)
   const today = toDateStr()
   const todaySale = sales.find((s) => s.date === today)
   const week = summarize(groupSales(sales, 'week').slice(-1))
@@ -53,14 +53,14 @@ export default function Dashboard() {
           </div>
 
           <div className="card">
-            <div className="grind-head"><h2>부족 재고</h2><Link className="link" to="/stock">재고 →</Link></div>
+            <div className="grind-head"><h2>⚠️ 재고 부족 경고</h2><Link className="link" to="/stock">재고 →</Link></div>
             {items.length === 0 && <p className="muted">등록된 품목이 없어요.</p>}
-            {items.length > 0 && low.length === 0 && <p className="ok-text">✓ 모든 품목이 최소 재고 이상이에요.</p>}
+            {items.length > 0 && low.length === 0 && <p className="ok-text">✓ 모든 품목이 발주량의 {Math.round((1 - settings.shortageRate) * 100)}% 넘게 남아 있어요.</p>}
             <ul className="list plain">
               {low.map(({ item, qty }) => (
                 <li key={item.id} className="list-row compact">
                   <span>{item.name}<span className="tag danger">부족</span></span>
-                  <span className="muted">{Number(qty.toFixed(2))} / 최소 {item.minQty}{item.unit}</span>
+                  <span className="danger-text">{Number(qty.toFixed(2))} / 발주량 {orderQtyOf(item)}{item.unit}</span>
                 </li>
               ))}
             </ul>

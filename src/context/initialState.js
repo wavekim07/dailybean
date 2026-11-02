@@ -15,8 +15,9 @@ export const initialState = {
       restAdj: -0.1, // 숙성 기간 보정 (음수 = 굵게)
     },
     rewardThreshold: 45000, // 무료 음료 쿠폰 기준 누적 금액
+    shortageRate: 0.7, // 기본 발주량에서 70% 이상 줄면 재고 부족 경고
   },
-  items: [], // { id, name, category, unit, minQty }
+  items: [], // { id, name, category, unit, orderQty }  orderQty = 기본 발주량
   stockIns: [], // { id, date, itemId, qty, roastDate }
   counts: [], // { id, date, itemId, qty }  마감 실사
   shots: [], // { id, datetime, beanId, grind, dose, time, yield, memo, recommended, weather }

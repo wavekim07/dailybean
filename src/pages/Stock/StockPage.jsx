@@ -10,11 +10,11 @@ import ItemsPanel from './ItemsPanel.jsx'
 
 export default function StockPage() {
   const { state, dispatch } = useApp()
-  const { items, stockIns, counts } = state
+  const { items, stockIns, counts, settings } = state
   const [date, setDate] = useState(toDateStr())
   const [tab, setTab] = useState('items')
 
-  const rows = useMemo(() => usageRows(items, stockIns, counts, date), [items, stockIns, counts, date])
+  const rows = useMemo(() => usageRows(items, stockIns, counts, date, settings.shortageRate), [items, stockIns, counts, date, settings.shortageRate])
   const dayIns = stockIns.filter((s) => s.date === date)
   const nameOf = (id) => items.find((i) => i.id === id)?.name ?? '(삭제된 품목)'
 

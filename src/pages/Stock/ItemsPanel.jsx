@@ -10,7 +10,7 @@ import { currentStock } from '../../utils/stockCalc.js'
 // 재고 페이지의 "품목·현재 재고" 탭: 품목 등록·수정·삭제·검색 + 현재 추정 재고
 export default function ItemsPanel() {
   const { state, dispatch } = useApp()
-  const { items, stockIns, counts } = state
+  const { items, stockIns, counts, settings } = state
 
   const [keyword, setKeyword] = useState('')
   const [category, setCategory] = useState('전체')
@@ -61,7 +61,7 @@ export default function ItemsPanel() {
             </select>
           </div>
           <p className="muted count">{filtered.length}개 / 전체 {items.length}개</p>
-          <ItemList items={filtered} stockOf={(item) => currentStock(item, stockIns, counts)} onEdit={setEditingItem} onDelete={setDeleteTarget} />
+          <ItemList items={filtered} stockOf={(item) => currentStock(item, stockIns, counts)} shortageRate={settings.shortageRate} onEdit={setEditingItem} onDelete={setDeleteTarget} />
         </div>
       </div>
       <ConfirmDialog

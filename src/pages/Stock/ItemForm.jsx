@@ -1,12 +1,12 @@
 import { useState } from 'react'
 import { CATEGORIES, UNITS } from '../../constants/categories.js'
 
-const EMPTY = { name: '', category: CATEGORIES[0], unit: UNITS[0], minQty: '' }
+const EMPTY = { name: '', category: CATEGORIES[0], unit: UNITS[0], orderQty: '' }
 
 // editingItem이 있으면 수정 모드, 없으면 등록 모드
 // 부모가 key를 바꿔서 다시 만들기 때문에 초기값만 받으면 됨
 export default function ItemForm({ editingItem, existingNames, onSubmit, onCancel }) {
-  const [form, setForm] = useState(editingItem ? { ...editingItem, minQty: String(editingItem.minQty) } : EMPTY)
+  const [form, setForm] = useState(editingItem ? { ...editingItem, orderQty: String(editingItem.orderQty ?? editingItem.minQty ?? '') } : EMPTY)
   const [error, setError] = useState('')
 
   const handleChange = (e) => {
@@ -18,13 +18,14 @@ export default function ItemForm({ editingItem, existingNames, onSubmit, onCance
   const handleSubmit = (e) => {
     e.preventDefault()
     const name = form.name.trim()
-    const minQty = Number(form.minQty)
+    const orderQty = Number(form.orderQty)
     if (!name) return setError('품목명을 입력해 주세요.')
-    if (form.minQty === '' || Number.isNaN(minQty) || minQty < 0) return setError('최소 재고는 0 이상의 숫자로 입력해 주세요.')
+    if (form.orderQty === '' || Number.isNaN(orderQty) || orderQty <= 0) return setError('기본 발주량은 0보다 큰 숫자로 입력해 주세요.')
     const duplicated = existingNames.some((n) => n === name && n !== editingItem?.name)
     if (duplicated) return setError('같은 이름의 품목이 이미 있어요.')
 
-    onSubmit({ ...form, name, minQty })
+    const { minQty: _old, ...rest } = form // 예전 필드 정리
+    onSubmit({ ...rest, name, orderQty })
     if (!editingItem) setForm(EMPTY)
   }
 
@@ -49,8 +50,8 @@ export default function ItemForm({ editingItem, existingNames, onSubmit, onCance
           </select>
         </label>
         <label>
-          최소 재고
-          <input className="input" name="minQty" inputMode="decimal" value={form.minQty} onChange={handleChange} placeholder="예: 2" />
+          기본 발주량
+          <input className="input" name="orderQty" inputMode="decimal" value={form.orderQty} onChange={handleChange} placeholder="예: 5" />
         </label>
       </div>
       {error && <p className="error">{error}</p>}

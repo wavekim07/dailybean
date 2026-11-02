@@ -12,7 +12,7 @@ export default function UsageTable({ rows }) {
         <tbody>
           {rows.map(({ item, prevQty, prevDate, ins, todayQty, usage, low }) => (
             <tr key={item.id} className={low ? 'low' : ''}>
-              <td>{item.name}{low && <span className="tag danger">부족</span>}</td>
+              <td>{item.name}{low && <span className="tag danger">⚠️ 부족</span>}</td>
               <td title={prevDate ? `${prevDate} 실사` : '이전 실사 없음'}>{fmt(prevQty)}</td>
               <td>{ins ? `+${fmt(ins)}` : '-'}</td>
               <td>{fmt(todayQty)}</td>
