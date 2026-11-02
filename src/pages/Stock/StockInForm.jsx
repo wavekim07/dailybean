@@ -26,7 +26,7 @@ export default function StockInForm({ items, onSubmit }) {
     setForm((prev) => ({ ...prev, qty: '', roastDate: '' }))
   }
 
-  if (items.length === 0) return <div className="card placeholder">먼저 품목 페이지에서 품목을 등록해 주세요.</div>
+  if (items.length === 0) return <div className="card placeholder">먼저 "품목·현재 재고" 탭에서 품목을 등록해 주세요.</div>
 
   return (
     <form className="card form" onSubmit={handleSubmit}>

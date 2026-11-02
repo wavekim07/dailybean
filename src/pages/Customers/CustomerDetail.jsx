@@ -35,6 +35,8 @@ export default function CustomerDetail({ customer, threshold, onPurchase, onUseC
         </span>
       </div>
 
+      {customer.memo && <p className="memo">📝 {customer.memo}</p>}
+
       <div className="coupon-box">
         <span>보유 쿠폰</span>
         <strong>{customer.coupons}장</strong>

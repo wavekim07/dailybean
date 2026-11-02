@@ -7,7 +7,7 @@ import { won } from '../../utils/format.js'
 import { groupSales, salesByWeather, summarize, total } from '../../utils/salesStats.js'
 import { fetchWeatherAt, weatherText } from '../../utils/weatherApi.js'
 import SalesForm from './SalesForm.jsx'
-import { PaymentPieChart, SalesBarChart, WeatherSalesChart } from './SalesCharts.jsx'
+import { PaymentPieChart, SalesBarChart, SalesShareChart, WeatherSalesChart } from './SalesCharts.jsx'
 
 const PERIODS = [
   { id: 'day', label: '일별 (14일)' },
@@ -21,6 +21,7 @@ export default function SalesPage() {
 
   const [date, setDate] = useState(toDateStr())
   const [period, setPeriod] = useState('day')
+  const [chartType, setChartType] = useState('bar') // 'bar' | 'pie' 버튼으로 전환
   const [month, setMonth] = useState(toDateStr().slice(0, 7))
   const [saving, setSaving] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState(null)
@@ -86,7 +87,15 @@ export default function SalesPage() {
             <div className="card"><h2>영업일 평균</h2><p className="big">{won(sum.avg)}</p></div>
             <div className="card"><h2>카드 비중</h2><p className="big">{Math.round(sum.cardRate * 100)}%</p></div>
           </div>
-          <div className="card"><h2>기간별 매출</h2><SalesBarChart rows={rows} /></div>
+          <div className="card">
+            <div className="grind-head">
+              <h2>기간별 매출</h2>
+              <button className="btn" onClick={() => setChartType((t) => (t === 'bar' ? 'pie' : 'bar'))}>
+                {chartType === 'bar' ? '🥧 원형으로 보기' : '📊 막대로 보기'}
+              </button>
+            </div>
+            {chartType === 'bar' ? <SalesBarChart rows={rows} /> : <SalesShareChart rows={rows} />}
+          </div>
           <div className="grid half">
             <div className="card"><h2>결제 비중</h2><PaymentPieChart card={sum.card} cash={sum.cash} /></div>
             <div className="card"><h2>날씨별 하루 평균 (전체 기간)</h2><WeatherSalesChart rows={byWeather} /></div>

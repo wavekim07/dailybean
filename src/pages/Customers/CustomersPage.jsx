@@ -21,7 +21,7 @@ export default function CustomersPage() {
   const filtered = useMemo(() => {
     const k = keyword.trim()
     const digits = k.replace(/\D/g, '')
-    return customers.filter((c) => !k || (digits && c.phone.replace(/\D/g, '').endsWith(digits)) || (c.name && c.name.includes(k)))
+    return customers.filter((c) => !k || (digits && c.phone.replace(/\D/g, '').endsWith(digits)) || (c.name && c.name.includes(k)) || (c.memo && c.memo.includes(k)))
   }, [customers, keyword])
 
   const selected = customers.find((c) => c.id === selectedId)
@@ -56,7 +56,7 @@ export default function CustomersPage() {
         </div>
         <div className="search-col">
           <div className="toolbar">
-            <SearchBar value={keyword} onChange={setKeyword} placeholder="전화번호 뒷자리 4자리 또는 이름" />
+            <SearchBar value={keyword} onChange={setKeyword} placeholder="전화번호 뒷자리, 이름, 메모 검색" />
           </div>
           <p className="muted count">{filtered.length}명 / 전체 {customers.length}명</p>
           {filtered.length === 0 && <div className="card placeholder">찾는 고객이 없어요. 왼쪽에서 새로 등록해 주세요.</div>}
@@ -66,6 +66,7 @@ export default function CustomersPage() {
                 <button className={`card list-row customer-row ${c.id === selectedId ? 'selected' : ''}`} onClick={() => setSelectedId(c.id)}>
                   <span>
                     <strong>{c.phone.slice(-4)}</strong> <span className="muted">{c.name}</span>
+                    {c.memo && <span className="muted small memo-line">{c.memo}</span>}
                   </span>
                   <span className="muted">
                     {won(c.accAmount)} {c.coupons > 0 && <span className="tag ok">쿠폰 {c.coupons}</span>}

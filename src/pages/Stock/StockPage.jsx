@@ -6,11 +6,13 @@ import { usageRows } from '../../utils/stockCalc.js'
 import StockInForm from './StockInForm.jsx'
 import DailyCountForm from './DailyCountForm.jsx'
 import UsageTable from './UsageTable.jsx'
+import ItemsPanel from './ItemsPanel.jsx'
 
 export default function StockPage() {
   const { state, dispatch } = useApp()
   const { items, stockIns, counts } = state
   const [date, setDate] = useState(toDateStr())
+  const [tab, setTab] = useState('items')
 
   const rows = useMemo(() => usageRows(items, stockIns, counts, date), [items, stockIns, counts, date])
   const dayIns = stockIns.filter((s) => s.date === date)
@@ -18,7 +20,13 @@ export default function StockPage() {
 
   return (
     <section>
-      <PageHeader title="재고" description="입고를 기록하고 마감 때 남은 재고를 입력해요." />
+      <PageHeader title="재고" description="품목과 현재 재고를 관리하고, 입고와 마감 실사를 기록해요." />
+      <div className="tabs page-tabs">
+        <button className={`tab ${tab === 'items' ? 'active' : ''}`} onClick={() => setTab('items')}>품목·현재 재고</button>
+        <button className={`tab ${tab === 'daily' ? 'active' : ''}`} onClick={() => setTab('daily')}>입고·마감 실사</button>
+      </div>
+      {tab === 'items' ? <ItemsPanel /> : (
+      <>
       <div className="toolbar">
         <label className="inline">
           기준 날짜
@@ -56,6 +64,8 @@ export default function StockPage() {
           <UsageTable rows={rows} />
         </div>
       </div>
+      </>
+      )}
     </section>
   )
 }

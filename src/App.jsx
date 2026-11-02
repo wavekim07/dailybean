@@ -4,7 +4,6 @@ import Layout from './components/layout/Layout.jsx'
 import Dashboard from './pages/Dashboard/Dashboard.jsx'
 import GrindPage from './pages/Grind/GrindPage.jsx'
 import StockPage from './pages/Stock/StockPage.jsx'
-import ItemsPage from './pages/Items/ItemsPage.jsx'
 import CustomersPage from './pages/Customers/CustomersPage.jsx'
 import SettingsPage from './pages/Settings/SettingsPage.jsx'
 
@@ -18,7 +17,7 @@ export default function App() {
         <Route index element={<Dashboard />} />
         <Route path="grind" element={<GrindPage />} />
         <Route path="stock" element={<StockPage />} />
-        <Route path="items" element={<ItemsPage />} />
+        <Route path="items" element={<Navigate to="/stock" replace />} />
         <Route path="sales" element={<Suspense fallback={<p className="muted">불러오는 중…</p>}><SalesPage /></Suspense>} />
         <Route path="customers" element={<CustomersPage />} />
         <Route path="settings" element={<SettingsPage />} />

@@ -60,3 +60,24 @@ export function WeatherSalesChart({ rows }) {
     </div>
   )
 }
+
+const SLICE_COLORS = ['#6f4e37', '#8b6347', '#a67b5b', '#c19a6b', '#d4a373', '#e6c79c', '#b08968', '#7f5539', '#9c6644', '#ddb892', '#c8a27a', '#e9d8a6', '#bc8a5f', '#a47148']
+
+// 기간별 매출을 원형으로: 각 일/주/월이 전체에서 차지하는 비중
+export function SalesShareChart({ rows }) {
+  const data = rows.filter((r) => r.total > 0).map((r) => ({ name: r.label, value: r.total }))
+  if (data.length === 0) return <p className="muted">이 기간 매출이 없어요.</p>
+  return (
+    <div className="chart">
+      <ResponsiveContainer width="100%" height={260}>
+        <PieChart>
+          <Pie data={data} dataKey="value" nameKey="name" outerRadius={95} isAnimationActive={false}
+            label={({ name, percent }) => (percent >= 0.05 ? `${name} ${Math.round(percent * 100)}%` : '')} labelLine={false}>
+            {data.map((d, i) => <Cell key={d.name} fill={SLICE_COLORS[i % SLICE_COLORS.length]} />)}
+          </Pie>
+          <Tooltip formatter={(v) => won(v)} />
+        </PieChart>
+      </ResponsiveContainer>
+    </div>
+  )
+}

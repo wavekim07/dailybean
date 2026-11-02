@@ -35,7 +35,7 @@ export default function ShotForm({ beans, defaultBeanId, suggestedGrind, editing
     if (ok && !editingShot) setForm(blank(form.beanId, form.grind))
   }
 
-  if (beans.length === 0) return <div className="card placeholder">품목에서 분류가 "원두"인 품목을 먼저 등록해 주세요.</div>
+  if (beans.length === 0) return <div className="card placeholder">재고 페이지의 "품목·현재 재고" 탭에서 분류가 "원두"인 품목을 먼저 등록해 주세요.</div>
 
   return (
     <form className="card form" onSubmit={handleSubmit}>

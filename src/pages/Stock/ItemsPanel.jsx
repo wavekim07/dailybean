@@ -1,13 +1,14 @@
 import { useMemo, useState } from 'react'
-import PageHeader from '../../components/common/PageHeader.jsx'
 import SearchBar from '../../components/common/SearchBar.jsx'
 import ConfirmDialog from '../../components/common/ConfirmDialog.jsx'
 import { useApp } from '../../context/AppContext.jsx'
 import { CATEGORIES } from '../../constants/categories.js'
 import ItemForm from './ItemForm.jsx'
 import ItemList from './ItemList.jsx'
+import { currentStock } from '../../utils/stockCalc.js'
 
-export default function ItemsPage() {
+// 재고 페이지의 "품목·현재 재고" 탭: 품목 등록·수정·삭제·검색 + 현재 추정 재고
+export default function ItemsPanel() {
   const { state, dispatch } = useApp()
   const { items, stockIns, counts } = state
 
@@ -43,8 +44,7 @@ export default function ItemsPage() {
   }
 
   return (
-    <section>
-      <PageHeader title="품목" description="재고로 관리할 품목을 등록·수정·삭제·검색해요." />
+    <>
       <div className="two-col">
         <ItemForm
           key={editingItem?.id ?? 'new'}
@@ -61,7 +61,7 @@ export default function ItemsPage() {
             </select>
           </div>
           <p className="muted count">{filtered.length}개 / 전체 {items.length}개</p>
-          <ItemList items={filtered} onEdit={setEditingItem} onDelete={setDeleteTarget} />
+          <ItemList items={filtered} stockOf={(item) => currentStock(item, stockIns, counts)} onEdit={setEditingItem} onDelete={setDeleteTarget} />
         </div>
       </div>
       <ConfirmDialog
@@ -75,6 +75,6 @@ export default function ItemsPage() {
         onConfirm={confirmDelete}
         onCancel={() => setDeleteTarget(null)}
       />
-    </section>
+    </>
   )
 }
