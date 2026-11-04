@@ -5,7 +5,7 @@ import StaffPicker from '../../components/common/StaffPicker.jsx'
 import Handoff from '../Ops/Handoff.jsx'
 import { useApp } from '../../context/AppContext.jsx'
 import useGrindRecommendation from '../../hooks/useGrindRecommendation.js'
-import { lowStockItems, orderQtyOf } from '../../utils/stockCalc.js'
+import { hasStockRecord, lowStockItems, orderQtyOf } from '../../utils/stockCalc.js'
 import { groupSales, summarize, total } from '../../utils/salesStats.js'
 import { toDateStr } from '../../utils/date.js'
 import { won } from '../../utils/format.js'
@@ -29,6 +29,7 @@ export default function Dashboard() {
   const [now] = useState(() => new Date())
   const today = toDateStr()
   const low = lowStockItems(items, stockIns, counts, settings.shortageRate)
+  const unknown = items.filter((i) => !hasStockRecord(i, stockIns, counts))
   const todaySale = sales.find((s) => s.date === today)
   const week = summarize(groupSales(sales, 'week').slice(-1))
   const recent = [...shots].sort((a, b) => b.datetime.localeCompare(a.datetime)).slice(0, 4)
@@ -77,8 +78,8 @@ export default function Dashboard() {
               })}
               <Link to="/ops?tab=stock" className={`today-check ${low.length ? 'alert' : ''}`}>
                 <span>재고</span>
-                <strong>{items.length === 0 ? '등록 전' : low.length ? `${low.length}개 부족` : '여유'}</strong>
-                <span className="glance-sub">{items.length === 0 ? '품목을 등록해 주세요' : low.slice(0, 2).map((l) => l.item.name).join(', ') || '발주 걱정 없어요'}</span>
+                <strong>{items.length === 0 ? '등록 전' : low.length ? `${low.length}개 부족` : unknown.length === items.length ? '수량 입력 전' : '여유'}</strong>
+                <span className="glance-sub">{items.length === 0 ? '품목을 등록해 주세요' : low.length ? low.slice(0, 2).map((l) => l.item.name).join(', ') : unknown.length ? `${unknown.length}개 수량 입력 전` : '발주 걱정 없어요'}</span>
               </Link>
             </div>
             <h3 className="sub-title">인수인계 <Link className="link" to="/ops?tab=handoff">남기기</Link></h3>

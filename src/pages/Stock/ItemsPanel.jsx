@@ -5,7 +5,9 @@ import { useApp } from '../../context/AppContext.jsx'
 import { CATEGORIES } from '../../constants/categories.js'
 import ItemForm from './ItemForm.jsx'
 import ItemList from './ItemList.jsx'
-import { currentStock } from '../../utils/stockCalc.js'
+import { currentStock, hasStockRecord } from '../../utils/stockCalc.js'
+import { newId } from '../../context/reducers.js'
+import { toDateStr } from '../../utils/date.js'
 
 // 재고 페이지의 "품목·현재 재고" 탭: 품목 등록·수정·삭제·검색 + 현재 추정 재고
 export default function ItemsPanel() {
@@ -26,14 +28,19 @@ export default function ItemsPanel() {
       .sort((a, b) => a.name.localeCompare(b.name, 'ko'))
   }, [items, keyword, category])
 
-  const handleSubmit = (data) => {
+  const handleSubmit = (data, currentQty) => {
     if (editingItem) {
       dispatch({ type: 'UPDATE_ITEM', payload: { ...data, id: editingItem.id } })
       setEditingItem(null)
     } else {
-      dispatch({ type: 'ADD_ITEM', payload: data })
+      const id = newId()
+      dispatch({ type: 'ADD_ITEM', payload: { ...data, id } })
+      // 등록할 때 지금 있는 양을 넣었으면 오늘 실사로 저장 → 바로 현재 재고가 계산됨
+      if (currentQty !== null) dispatch({ type: 'SAVE_DAILY_COUNT', payload: { date: toDateStr(), quantities: { [id]: currentQty } } })
     }
   }
+  // 목록에서 바로 지금 수량 입력 (오늘 실사로 저장)
+  const saveCount = (item, qty) => dispatch({ type: 'SAVE_DAILY_COUNT', payload: { date: toDateStr(), quantities: { [item.id]: qty } } })
 
   const hasRecords = (id) => stockIns.some((s) => s.itemId === id) || counts.some((c) => c.itemId === id)
 
@@ -61,7 +68,7 @@ export default function ItemsPanel() {
             </select>
           </div>
           <p className="muted count">{filtered.length}개 / 전체 {items.length}개</p>
-          <ItemList items={filtered} stockOf={(item) => currentStock(item, stockIns, counts)} shortageRate={settings.shortageRate} onEdit={setEditingItem} onDelete={setDeleteTarget} />
+          <ItemList items={filtered} stockOf={(item) => currentStock(item, stockIns, counts)} known={(item) => hasStockRecord(item, stockIns, counts)} onCount={saveCount} shortageRate={settings.shortageRate} onEdit={setEditingItem} onDelete={setDeleteTarget} />
         </div>
       </div>
       <ConfirmDialog

@@ -37,8 +37,13 @@ export function currentStock(item, stockIns, counts) {
   return (last ? last.qty : 0) + ins
 }
 
+// 입고나 실사 기록이 하나라도 있어야 재고를 알 수 있음 (없으면 '0'이 아니라 '입력 전')
+export const hasStockRecord = (item, stockIns, counts) =>
+  stockIns.some((s) => s.itemId === item.id) || counts.some((c) => c.itemId === item.id)
+
 export function lowStockItems(items, stockIns, counts, shortageRate) {
   return items
+    .filter((item) => hasStockRecord(item, stockIns, counts))
     .map((item) => ({ item, qty: currentStock(item, stockIns, counts) }))
     .filter(({ item, qty }) => isLow(item, qty, shortageRate))
 }

@@ -359,3 +359,9 @@ a.staff-chip { padding: 6px 12px; }
 .today-check .progress { display: block; }
 .today-check .progress .bar { display: block; }
 .add-btn { width: 100%; padding: 14px; border-style: dashed; color: var(--primary); font-weight: 700; }
+.tag.pending { background: #eee8df; color: var(--muted); margin-left: 6px; }
+.item-row { flex-wrap: wrap; }
+.item-main { flex: 1; min-width: 0; }
+.count-inline { margin-top: 8px; }
+.count-inline .input { flex: 1; min-width: 120px; }
+@media (max-width: 768px) { .item-row .item-main { flex-basis: 100%; } .item-row > .actions { width: 100%; justify-content: flex-start; } }

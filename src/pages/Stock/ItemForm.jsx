@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { CATEGORIES, UNITS } from '../../constants/categories.js'
 
-const EMPTY = { name: '', category: CATEGORIES[0], unit: UNITS[0], orderQty: '' }
+const EMPTY = { name: '', category: CATEGORIES[0], unit: UNITS[0], orderQty: '', currentQty: '' }
 
 // editingItem이 있으면 수정 모드, 없으면 등록 모드
 // 부모가 key를 바꿔서 다시 만들기 때문에 초기값만 받으면 됨
@@ -24,8 +24,10 @@ export default function ItemForm({ editingItem, existingNames, onSubmit, onCance
     const duplicated = existingNames.some((n) => n === name && n !== editingItem?.name)
     if (duplicated) return setError('같은 이름의 품목이 이미 있어요.')
 
-    const { minQty: _old, ...rest } = form // 예전 필드 정리
-    onSubmit({ ...rest, name, orderQty })
+    const currentQty = form.currentQty === '' || form.currentQty == null ? null : Number(form.currentQty)
+    if (currentQty !== null && (Number.isNaN(currentQty) || currentQty < 0)) return setError('지금 있는 양은 0 이상의 숫자로 입력해 주세요.')
+    const { minQty: _old, currentQty: _c, ...rest } = form // 예전 필드·임시 필드 정리
+    onSubmit({ ...rest, name, orderQty }, currentQty)
     if (!editingItem) setForm(EMPTY)
   }
 
@@ -54,6 +56,13 @@ export default function ItemForm({ editingItem, existingNames, onSubmit, onCance
           <input className="input" name="orderQty" inputMode="decimal" value={form.orderQty} onChange={handleChange} placeholder="예: 5" />
         </label>
       </div>
+      {!editingItem && (
+        <label>
+          지금 있는 양 (선택)
+          <input className="input" name="currentQty" inputMode="decimal" value={form.currentQty} onChange={handleChange} placeholder={`지금 매장에 있는 양 (${form.unit})`} />
+          <span className="muted small">넣으면 오늘 실사로 저장돼서 바로 현재 재고가 보여요. 비워 두면 '재고 입력 전'으로 표시돼요.</span>
+        </label>
+      )}
       {error && <p className="error">{error}</p>}
       <div className="actions">
         {editingItem && <button type="button" className="btn" onClick={onCancel}>취소</button>}
