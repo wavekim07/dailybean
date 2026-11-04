@@ -5,14 +5,15 @@ import { useApp } from '../../context/AppContext.jsx'
 import { CATEGORIES } from '../../constants/categories.js'
 import ItemForm from './ItemForm.jsx'
 import ItemList from './ItemList.jsx'
-import { currentStock, hasStockRecord } from '../../utils/stockCalc.js'
+import { currentStock, hasStockRecord, orderQtyOf } from '../../utils/stockCalc.js'
 import { newId } from '../../context/reducers.js'
 import { toDateStr } from '../../utils/date.js'
+import { activeOrderOf } from '../../utils/orders.js'
 
 // 재고 페이지의 "품목·현재 재고" 탭: 품목 등록·수정·삭제·검색 + 현재 추정 재고
 export default function ItemsPanel() {
   const { state, dispatch } = useApp()
-  const { items, stockIns, counts, settings } = state
+  const { items, stockIns, counts, settings, orders = [] } = state
 
   const [keyword, setKeyword] = useState('')
   const [category, setCategory] = useState('전체')
@@ -68,7 +69,8 @@ export default function ItemsPanel() {
             </select>
           </div>
           <p className="muted count">{filtered.length}개 / 전체 {items.length}개</p>
-          <ItemList items={filtered} stockOf={(item) => currentStock(item, stockIns, counts)} known={(item) => hasStockRecord(item, stockIns, counts)} onCount={saveCount} shortageRate={settings.shortageRate} onEdit={setEditingItem} onDelete={setDeleteTarget} />
+          <ItemList items={filtered} stockOf={(item) => currentStock(item, stockIns, counts)} known={(item) => hasStockRecord(item, stockIns, counts)} onCount={saveCount} shortageRate={settings.shortageRate} onEdit={setEditingItem} onDelete={setDeleteTarget}
+            inOrder={(item) => !!activeOrderOf(orders, item.id)} onOrder={(item) => dispatch({ type: 'ADD_ORDER', payload: { itemId: item.id, qty: orderQtyOf(item) } })} />
         </div>
       </div>
       <ConfirmDialog

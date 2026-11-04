@@ -29,6 +29,7 @@ export default function Dashboard() {
   const [now] = useState(() => new Date())
   const today = toDateStr()
   const low = lowStockItems(items, stockIns, counts, settings.shortageRate)
+  const waiting = (state.orders || []).filter((o) => o.status !== 'received').length
   const unknown = items.filter((i) => !hasStockRecord(i, stockIns, counts))
   const todaySale = sales.find((s) => s.date === today)
   const week = summarize(groupSales(sales, 'week').slice(-1))
@@ -149,7 +150,7 @@ export default function Dashboard() {
         </div>
 
         <div className="panel">
-          <div className="panel-title"><h2>발주 확인</h2><Link className="link" to="/stock">재고 보기</Link></div>
+          <div className="panel-title"><h2>발주 확인</h2><Link className="link" to="/ops?tab=order">{waiting ? `발주 목록 ${waiting}개` : '발주 목록'}</Link></div>
           {items.length === 0 && <p className="muted">재고 화면에서 품목과 기본 발주량을 등록해 주세요.</p>}
           {items.length > 0 && low.length === 0 && <p className="ok-text">모든 품목이 발주량의 {Math.round((1 - settings.shortageRate) * 100)}% 넘게 남아 있어요.</p>}
           <ul className="low-list">

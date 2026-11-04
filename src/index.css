@@ -365,3 +365,19 @@ a.staff-chip { padding: 6px 12px; }
 .count-inline { margin-top: 8px; }
 .count-inline .input { flex: 1; min-width: 120px; }
 @media (max-width: 768px) { .item-row .item-main { flex-basis: 100%; } .item-row > .actions { width: 100%; justify-content: flex-start; } }
+
+/* 발주 목록 */
+.order-add { margin-top: 12px; align-items: center; }
+.order-add select { flex: 1 1 160px; }
+.input.qty-input, .row > .input.qty-input { width: 84px; flex: 0 0 84px; }
+.order-row .inline { white-space: nowrap; }
+.order-add { flex-wrap: nowrap; }
+.order-add select { min-width: 0; }
+.order-group { border-top: 1px solid var(--border); padding-top: 12px; margin-top: 12px; }
+.order-group:first-of-type { border-top: none; margin-top: 4px; }
+.order-group-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 4px; }
+.order-row { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.order-row:last-child { border-bottom: none; }
+.order-main { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.receive-form { flex-basis: 100%; background: var(--primary-soft); border-radius: 10px; padding: 12px; }
+.tag.ordered-tag { margin-left: 6px; }

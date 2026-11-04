@@ -1,12 +1,12 @@
 import { useState } from 'react'
 import { CATEGORIES, UNITS } from '../../constants/categories.js'
 
-const EMPTY = { name: '', category: CATEGORIES[0], unit: UNITS[0], orderQty: '', currentQty: '' }
+const EMPTY = { name: '', category: CATEGORIES[0], unit: UNITS[0], orderQty: '', supplier: '', currentQty: '' }
 
 // editingItem이 있으면 수정 모드, 없으면 등록 모드
 // 부모가 key를 바꿔서 다시 만들기 때문에 초기값만 받으면 됨
 export default function ItemForm({ editingItem, existingNames, onSubmit, onCancel }) {
-  const [form, setForm] = useState(editingItem ? { ...editingItem, orderQty: String(editingItem.orderQty ?? editingItem.minQty ?? '') } : EMPTY)
+  const [form, setForm] = useState(editingItem ? { ...editingItem, supplier: editingItem.supplier ?? '', orderQty: String(editingItem.orderQty ?? editingItem.minQty ?? '') } : EMPTY)
   const [error, setError] = useState('')
 
   const handleChange = (e) => {
@@ -27,7 +27,7 @@ export default function ItemForm({ editingItem, existingNames, onSubmit, onCance
     const currentQty = form.currentQty === '' || form.currentQty == null ? null : Number(form.currentQty)
     if (currentQty !== null && (Number.isNaN(currentQty) || currentQty < 0)) return setError('지금 있는 양은 0 이상의 숫자로 입력해 주세요.')
     const { minQty: _old, currentQty: _c, ...rest } = form // 예전 필드·임시 필드 정리
-    onSubmit({ ...rest, name, orderQty }, currentQty)
+    onSubmit({ ...rest, name, orderQty, supplier: (form.supplier || '').trim() }, currentQty)
     if (!editingItem) setForm(EMPTY)
   }
 
@@ -56,6 +56,11 @@ export default function ItemForm({ editingItem, existingNames, onSubmit, onCance
           <input className="input" name="orderQty" inputMode="decimal" value={form.orderQty} onChange={handleChange} placeholder="예: 5" />
         </label>
       </div>
+      <label>
+        거래처 (선택)
+        <input className="input" name="supplier" value={form.supplier} onChange={handleChange} placeholder="예: OO유업, 원두 로스터리" />
+        <span className="muted small">적어 두면 발주 목록이 거래처별로 묶이고, 거래처에 보낼 문자를 바로 복사할 수 있어요.</span>
+      </label>
       {!editingItem && (
         <label>
           지금 있는 양 (선택)

@@ -14,6 +14,8 @@ const update = (list, data) => list.map((x) => (x.id === data.id ? { ...x, ...da
 const remove = (list, id) => list.filter((x) => x.id !== id)
 
 const nowStr = () => `${toDateStr()}T${new Date().toTimeString().slice(0, 5)}`
+// 입고·실사 기록 시각 (초까지): 같은 날 실사와 입고의 앞뒤를 가리는 데 씀 (utils/stockCalc.js)
+const stampStr = () => `${toDateStr()}T${new Date().toTimeString().slice(0, 8)}`
 
 // 기록에 "누가"를 붙임: 지금 근무자 (설정에서 고름)
 const withStaff = (state, data) => ({ staffId: state.settings.currentStaffId ?? null, ...data })
@@ -27,21 +29,55 @@ export function rootReducer(state, action) {
     case 'UPDATE_ITEM':
       return { ...state, items: update(state.items, payload) }
     case 'DELETE_ITEM':
-      return { ...state, items: remove(state.items, payload) }
+      // 품목을 지우면 아직 입고 안 된 그 품목의 발주도 같이 지움
+      return { ...state, items: remove(state.items, payload), orders: state.orders.filter((o) => !(o.itemId === payload && o.status !== 'received')) }
 
     // 재고
     case 'ADD_STOCK_IN':
-      return { ...state, stockIns: add(state.stockIns, withStaff(state, payload)) }
-    case 'DELETE_STOCK_IN':
-      return { ...state, stockIns: remove(state.stockIns, payload) }
+      return { ...state, stockIns: add(state.stockIns, withStaff(state, { at: stampStr(), ...payload })) }
+    case 'DELETE_STOCK_IN': {
+      // 발주에서 만들어진 입고를 지우면 그 발주는 다시 '주문함'으로 돌아감 (입고가 잘못 눌렸을 때 되돌리기)
+      const orders = state.orders.map((o) => (o.stockInId === payload ? { ...o, status: 'ordered', receivedAt: null, receivedQty: null, stockInId: null } : o))
+      return { ...state, stockIns: remove(state.stockIns, payload), orders }
+    }
     case 'SAVE_DAILY_COUNT': {
       // payload: { date, quantities: { [itemId]: qty } }
       // 같은 날짜에서 이번에 입력한 품목의 기록만 바꾸고, 입력하지 않은 품목의 기록은 그대로 둠
       const { date, quantities } = payload
       const others = state.counts.filter((c) => !(c.date === date && c.itemId in quantities))
-      const rows = Object.entries(quantities).map(([itemId, qty]) => ({ id: newId(), date, itemId, qty: Number(qty), staffId: state.settings.currentStaffId ?? null }))
+      const rows = Object.entries(quantities).map(([itemId, qty]) => ({ id: newId(), date, itemId, qty: Number(qty), at: stampStr(), staffId: state.settings.currentStaffId ?? null }))
       return { ...state, counts: [...others, ...rows] }
     }
+
+    // 발주 목록: 담기 → 주문함 → 입고 완료(입고 기록이 자동으로 생김)
+    case 'ADD_ORDER': {
+      // 같은 품목이 아직 입고 안 된 채 목록에 있으면 새로 담지 않음 (두 번 주문 방지)
+      if (state.orders.some((o) => o.itemId === payload.itemId && o.status !== 'received')) return state
+      return { ...state, orders: add(state.orders, withStaff(state, { status: 'draft', createdAt: nowStr(), ...payload })) }
+    }
+    case 'UPDATE_ORDER_QTY':
+      return { ...state, orders: update(state.orders, { id: payload.id, qty: Number(payload.qty) }) }
+    case 'MARK_ORDERED': {
+      // payload: 주문 보낸 발주 id 목록 (거래처 하나 단위로 보냄)
+      const ids = new Set(payload)
+      return { ...state, orders: state.orders.map((o) => (ids.has(o.id) && o.status === 'draft' ? { ...o, status: 'ordered', orderedAt: nowStr(), orderedBy: state.settings.currentStaffId ?? null } : o)) }
+    }
+    case 'UNMARK_ORDERED':
+      return { ...state, orders: state.orders.map((o) => (o.id === payload && o.status === 'ordered' ? { ...o, status: 'draft', orderedAt: null, orderedBy: null } : o)) }
+    case 'RECEIVE_ORDER': {
+      // payload: { id, date, qty, roastDate } → 입고 기록을 만들고 발주를 '입고 완료'로
+      const order = state.orders.find((o) => o.id === payload.id)
+      if (!order || order.status === 'received') return state
+      const stockInId = newId()
+      const stockIn = withStaff(state, { id: stockInId, date: payload.date, itemId: order.itemId, qty: Number(payload.qty), roastDate: payload.roastDate || null, orderId: order.id, at: stampStr() })
+      return {
+        ...state,
+        stockIns: [...state.stockIns, stockIn],
+        orders: update(state.orders, { id: order.id, status: 'received', receivedAt: nowStr(), receivedQty: Number(payload.qty), stockInId, receivedBy: state.settings.currentStaffId ?? null }),
+      }
+    }
+    case 'DELETE_ORDER':
+      return { ...state, orders: remove(state.orders, payload) }
 
     // 근무자
     case 'ADD_STAFF':

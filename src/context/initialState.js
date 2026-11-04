@@ -24,7 +24,7 @@ export const initialState = {
     currentStaffId: null, // 지금 근무자 (로그인 없이 이름만 고름)
     checklists: { open: [], close: [] }, // 오픈·마감 확인 항목 [{ id, text }] — 매장이 직접 정함 // 기본 발주량에서 70% 이상 줄면 재고 부족 경고
   },
-  items: [], // { id, name, category, unit, orderQty }  orderQty = 기본 발주량
+  items: [], // { id, name, category, unit, orderQty, supplier }  orderQty = 기본 발주량, supplier = 거래처
   stockIns: [], // { id, date, itemId, qty, roastDate }
   counts: [], // { id, date, itemId, qty }  마감 실사
   shots: [], // { id, datetime, beanId, grind, dose, time, yield, memo, recommended, weather }
@@ -32,5 +32,6 @@ export const initialState = {
   customers: [],
   staff: [], // { id, name }
   notes: [], // 인수인계 { id, datetime, staffId, text, done, doneBy, doneAt }
+  orders: [], // 발주 { id, itemId, qty, status: draft|ordered|received, createdAt, orderedAt, receivedAt, stockInId, staffId }
   checkLogs: [], // 체크리스트 기록 { id, date, type, itemId, staffId, at } // { id, name, phone, accAmount, coupons, history }
 }

@@ -1,6 +1,6 @@
 // 백업 파일 검사: 불러오기 전에 구조를 확인하고, 문제가 있으면 기존 데이터를 건드리지 않음
 const REQUIRED = ['items', 'stockIns', 'counts', 'shots', 'sales', 'customers']
-const OPTIONAL = ['staff', 'notes', 'checkLogs'] // 나중에 추가된 항목: 예전 백업에는 없을 수 있음
+const OPTIONAL = ['staff', 'notes', 'checkLogs', 'orders'] // 나중에 추가된 항목: 예전 백업에는 없을 수 있음
 
 const isObj = (v) => v !== null && typeof v === 'object' && !Array.isArray(v)
 
