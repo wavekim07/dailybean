@@ -38,7 +38,7 @@ export default function CustomersPage() {
 
   return (
     <section>
-      <PageHeader title="고객" description={`누적 ${won(threshold)}마다 무료 음료 쿠폰 1장을 드려요.`} />
+      <PageHeader photo title="고객" description={`누적 ${won(threshold)}마다 무료 음료 쿠폰 1장을 드려요.`} />
       <div className="two-col">
         <div className="stack">
           <CustomerForm key={editing?.id ?? 'new'} editing={editing} phones={customers.map((c) => c.phone)}

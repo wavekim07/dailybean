@@ -17,6 +17,8 @@ export const initialState = {
       restDays: 3, // 로스팅 후 숙성 기간(일)
       restAdj: -0.1, // 숙성 기간 보정 (음수 = 굵게)
     },
+    photo: 'table', // 배경 사진 (utils/photos.js의 id, 또는 'custom')
+    customPhoto: null, // 사용자가 올린 사진 (data URL)
     rewardThreshold: 45000, // 무료 음료 쿠폰 기준 누적 금액
     shortageRate: 0.7, // 기본 발주량에서 70% 이상 줄면 재고 부족 경고
   },

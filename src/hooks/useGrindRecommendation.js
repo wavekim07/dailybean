@@ -12,12 +12,15 @@ export default function useGrindRecommendation(beanId) {
 
   const result = useMemo(() => {
     const roastDate = beanId ? latestRoastDate(stockIns, beanId) : null
-    const logAdj = logAdjustment(shots, beanId)
+    // 지금 그라인더로 맞춘 기록만 보정에 사용 (그라인더가 바뀌면 숫자 기준도 달라서)
+    const grinder = settings.store?.grinder
+    const sameGrinder = shots.filter((s) => !s.grinder || !grinder || s.grinder === grinder)
+    const logAdj = logAdjustment(sameGrinder, beanId)
     const opts = { roastDate, logAdj }
     const rec = calcGrind(weather?.current ?? null, settings.grind, opts)
     const adjust = weather ? findAdjustPoint(weather.hourly, settings.grind, rec.value, opts) : null
     return { ...rec, roastDate, adjust }
-  }, [weather, settings.grind, stockIns, shots, beanId])
+  }, [weather, settings.grind, settings.store, stockIns, shots, beanId])
 
   return { weather, loading, error, reload, ...result }
 }

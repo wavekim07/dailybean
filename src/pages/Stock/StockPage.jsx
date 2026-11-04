@@ -20,7 +20,7 @@ export default function StockPage() {
 
   return (
     <section>
-      <PageHeader title="재고" description="품목과 현재 재고를 관리하고, 입고와 마감 실사를 기록해요." />
+      <PageHeader photo title="재고" description="품목과 현재 재고를 관리하고, 입고와 마감 실사를 기록해요." />
       <div className="tabs page-tabs">
         <button className={`tab ${tab === 'items' ? 'active' : ''}`} onClick={() => setTab('items')}>품목·현재 재고</button>
         <button className={`tab ${tab === 'daily' ? 'active' : ''}`} onClick={() => setTab('daily')}>입고·마감 실사</button>

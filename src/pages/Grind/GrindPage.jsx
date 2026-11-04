@@ -9,6 +9,7 @@ import { calcGrind, judgeTime, latestRoastDate } from '../../utils/grindCalc.js'
 import { fetchWeatherAt } from '../../utils/weatherApi.js'
 import ShotForm from './ShotForm.jsx'
 import ShotList from './ShotList.jsx'
+import ShotAverages from './ShotAverages.jsx'
 
 export default function GrindPage() {
   const { state, dispatch } = useApp()
@@ -42,7 +43,9 @@ export default function GrindPage() {
     }
     const roastDate = latestRoastDate(stockIns.filter((s) => s.date <= data.datetime.slice(0, 10)), data.beanId)
     const recommended = weather ? calcGrind(weather, settings.grind, { roastDate, onDate: data.datetime.slice(0, 10) }).value : null
-    const payload = { ...data, weather, recommended }
+    // 어떤 그라인더로 맞춘 기록인지 남겨서, 그라인더별 평균과 보정에 씀
+    const grinder = editingShot?.grinder ?? settings.store.grinder ?? ''
+    const payload = { ...data, weather, recommended, grinder }
     if (editingShot) {
       dispatch({ type: 'UPDATE_SHOT', payload: { ...payload, id: editingShot.id } })
       setEditingShot(null)
@@ -68,7 +71,7 @@ export default function GrindPage() {
 
   return (
     <section>
-      <PageHeader title="분쇄도" description="오늘 날씨와 원두 숙성도로 분쇄도를 추천하고 샷을 기록해요." />
+      <PageHeader photo title="분쇄도" description="오늘 날씨와 원두 숙성도로 분쇄도를 추천하고 샷을 기록해요." />
       <div className="two-col">
         <div className="stack">
           <WeatherCard location={settings.location.name} weather={rec.weather} loading={rec.loading} error={rec.error} onReload={rec.reload} />
@@ -110,6 +113,7 @@ export default function GrindPage() {
               </label>
             </div>
           </div>
+          <ShotAverages shots={shots} beanName={beanName} grinder={settings.store.grinder} />
           <p className="muted count">{filtered.length}개 / 전체 {shots.length}개</p>
           <ShotList shots={filtered} beanName={beanName} targetTime={settings.grind.targetTime} higherIsFiner={settings.grind.higherIsFiner} onEdit={setEditingShot} onDelete={setDeleteTarget} />
         </div>

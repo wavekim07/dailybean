@@ -3,6 +3,7 @@ import PageHeader from '../../components/common/PageHeader.jsx'
 import ConfirmDialog from '../../components/common/ConfirmDialog.jsx'
 import { useApp } from '../../context/AppContext.jsx'
 import LocationSetting from '../../components/settings/LocationSetting.jsx'
+import PhotoPicker from '../../components/photo/PhotoPicker.jsx'
 import { Link } from 'react-router-dom'
 import { toDateStr } from '../../utils/date.js'
 
@@ -144,12 +145,17 @@ export default function SettingsPage() {
 
   return (
     <section>
-      <PageHeader title="설정" description="매장 위치, 분쇄도 기준값, 쿠폰 기준을 정해요." />
+      <PageHeader title="설정" description="매장 정보, 배경 사진, 분쇄도 기준값, 쿠폰 기준을 정해요." />
       {notice && <p className="notice">✓ {notice}</p>}
       <div className="card store-summary">
         <h2>우리 매장</h2>
         <p><strong>{settings.store.name || '이름 없음'}</strong> · 머신 {settings.store.machine || '-'} · 그라인더 {settings.store.grinder || '-'}</p>
         <Link className="btn" to="/setup">매장 시작 설정 다시 하기</Link>
+      </div>
+      <div className="card form" style={{ marginBottom: 16 }}>
+        <h2>배경 사진</h2>
+        <p className="muted">홈 화면과 각 페이지 위쪽에 보여요. 우리 매장 사진을 올려도 돼요.</p>
+        <PhotoPicker onDone={() => setNotice('배경 사진을 바꿨어요.')} />
       </div>
       <div className="grid half">
         <LocationSetting location={settings.location} onSave={(location) => save({ location }, `매장 위치를 ${location.name}(으)로 바꿨어요.`)} />

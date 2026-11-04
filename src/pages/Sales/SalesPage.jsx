@@ -50,7 +50,7 @@ export default function SalesPage() {
 
   return (
     <section>
-      <PageHeader title="매출" description="하루 카드·현금 매출을 입력하고 기간별로 확인해요." />
+      <PageHeader photo title="매출" description="하루 카드·현금 매출을 입력하고 기간별로 확인해요." />
       <div className="two-col">
         <div className="stack">
           <SalesForm key={date + (existing?.id ?? '')} date={date} existing={existing} saving={saving} onDateChange={setDate} onSubmit={handleSubmit} />
