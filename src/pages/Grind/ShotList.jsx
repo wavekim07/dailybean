@@ -16,7 +16,7 @@ export default function ShotList({ shots, beanName, targetTime, higherIsFiner, o
                 <strong> {beanName(s.beanId)}</strong>
               </div>
               <div className="shot-nums">
-                <span>분쇄도 <b>{s.grind}</b></span>
+                <span>분쇄도 <b>{Number(s.grind).toFixed(1)}</b></span>
                 <span>{s.dose}g → {s.yield}g</span>
                 <span>{s.time}초 <span className={`tag ${j.status}`}>{j.label}</span></span>
               </div>

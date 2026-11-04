@@ -42,7 +42,7 @@ export default function CustomerForm({ editing, phones, onSubmit, onCancel }) {
       </label>
       {error && <p className="error">{error}</p>}
       <div className="actions">
-        {editing && <button type="button" className="btn" onClick={onCancel}>취소</button>}
+        <button type="button" className="btn" onClick={onCancel}>취소</button>
         <button className="btn primary" type="submit">{editing ? '수정 저장' : '등록'}</button>
       </div>
     </form>

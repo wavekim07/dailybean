@@ -30,7 +30,8 @@ export default function SetupPage() {
       ...p, grinderId: id,
       grinder: g ? g.name : id === 'custom' ? '' : p.grinder,
       ...(g?.higherIsFiner != null ? { higherIsFiner: g.higherIsFiner ? 'finer' : 'coarser' } : {}),
-      ...(g?.scale ? { min: String(g.scale.min), max: String(g.scale.max), base: '' } : {}),
+      // 숫자 눈금이 있으면 제조사 범위, 무단 조절이면 매장 눈금으로 직접 입력하게 비움
+      ...(g ? (g.scale ? { min: String(g.scale.min), max: String(g.scale.max), base: '' } : { min: '', max: '', base: '' }) : {}),
     }))
   }
 

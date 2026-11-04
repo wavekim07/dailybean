@@ -78,7 +78,7 @@ export default function Dashboard() {
               <Link to="/ops?tab=stock" className={`today-check ${low.length ? 'alert' : ''}`}>
                 <span>재고</span>
                 <strong>{items.length === 0 ? '등록 전' : low.length ? `${low.length}개 부족` : '여유'}</strong>
-                <span className="glance-sub">{low.slice(0, 2).map((l) => l.item.name).join(', ') || '발주 걱정 없어요'}</span>
+                <span className="glance-sub">{items.length === 0 ? '품목을 등록해 주세요' : low.slice(0, 2).map((l) => l.item.name).join(', ') || '발주 걱정 없어요'}</span>
               </Link>
             </div>
             <h3 className="sub-title">인수인계 <Link className="link" to="/ops?tab=handoff">남기기</Link></h3>
@@ -140,7 +140,7 @@ export default function Dashboard() {
               return (
                 <li key={s.id}>
                   <span className="tl-time">{s.datetime.slice(5, 10).replace('-', '/')} {s.datetime.slice(11, 16)}</span>
-                  <span className="tl-body"><b>{s.grind}</b> · {beanName(s.beanId)} · {s.time}초 <span className={`tag ${j.status}`}>{j.label}</span>{s.memo && <em className="tl-memo">“{s.memo}”</em>}</span>
+                  <span className="tl-body"><b>{Number(s.grind).toFixed(1)}</b> · {beanName(s.beanId)} · {s.time}초 <span className={`tag ${j.status}`}>{j.label}</span>{s.memo && <em className="tl-memo">“{s.memo}”</em>}</span>
                 </li>
               )
             })}

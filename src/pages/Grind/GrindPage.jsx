@@ -84,6 +84,8 @@ export default function GrindPage() {
             saving={saving}
             onSubmit={handleSubmit}
             onCancel={() => setEditingShot(null)}
+            targetTime={settings.grind.targetTime}
+            higherIsFiner={settings.grind.higherIsFiner !== false}
           />
           {notice && <p className="muted">{notice}</p>}
         </div>

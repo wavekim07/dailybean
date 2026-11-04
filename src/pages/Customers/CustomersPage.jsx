@@ -16,6 +16,7 @@ export default function CustomersPage() {
   const [selectedId, setSelectedId] = useState(null)
   const [editing, setEditing] = useState(null)
   const [deleteTarget, setDeleteTarget] = useState(null)
+  const [showForm, setShowForm] = useState(false)
 
   // 전화번호 뒷자리(숫자) 또는 이름으로 검색
   const filtered = useMemo(() => {
@@ -33,6 +34,7 @@ export default function CustomersPage() {
     } else {
       dispatch({ type: 'ADD_CUSTOMER', payload: data })
       setKeyword(data.phone.slice(-4))
+      setShowForm(false)
     }
   }
 
@@ -41,8 +43,6 @@ export default function CustomersPage() {
       <PageHeader photo title="고객" description={`누적 ${won(threshold)}마다 무료 음료 쿠폰 1장을 드려요.`} />
       <div className="two-col">
         <div className="stack">
-          <CustomerForm key={editing?.id ?? 'new'} editing={editing} phones={customers.map((c) => c.phone)}
-            onSubmit={handleSubmit} onCancel={() => setEditing(null)} />
           {selected && (
             <CustomerDetail
               customer={selected}
@@ -53,13 +53,20 @@ export default function CustomersPage() {
               onDelete={() => setDeleteTarget(selected)}
             />
           )}
+          {/* 계산대에서는 찾기·적립이 먼저라 등록 폼은 필요할 때만 펼침 */}
+          {editing || showForm || customers.length === 0 ? (
+            <CustomerForm key={editing?.id ?? 'new'} editing={editing} phones={customers.map((c) => c.phone)}
+              onSubmit={handleSubmit} onCancel={() => { setEditing(null); setShowForm(false) }} />
+          ) : (
+            <button className="btn add-btn" onClick={() => setShowForm(true)}>＋ 새 고객 등록</button>
+          )}
         </div>
         <div className="search-col">
           <div className="toolbar">
             <SearchBar value={keyword} onChange={setKeyword} placeholder="전화번호 뒷자리, 이름, 메모 검색" />
           </div>
           <p className="muted count">{filtered.length}명 / 전체 {customers.length}명</p>
-          {filtered.length === 0 && <div className="card placeholder">찾는 고객이 없어요. 왼쪽에서 새로 등록해 주세요.</div>}
+          {filtered.length === 0 && <div className="card placeholder">찾는 고객이 없어요. <button className="link-btn" onClick={() => setShowForm(true)}>새 고객으로 등록</button></div>}
           <ul className="list">
             {filtered.map((c) => (
               <li key={c.id}>

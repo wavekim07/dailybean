@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { judgeTime } from '../../utils/grindCalc.js'
 
 const nowLocal = () => {
   const d = new Date()
@@ -9,30 +10,39 @@ const nowLocal = () => {
 const blank = (beanId, grind) => ({ datetime: nowLocal(), beanId: beanId ?? '', grind: grind ?? '', dose: '19.2', time: '', yield: '32', memo: '' })
 
 // editingShot이 있으면 수정 모드. 부모가 key로 다시 만들어 초기화
-export default function ShotForm({ beans, defaultBeanId, suggestedGrind, editingShot, saving, onSubmit, onCancel }) {
+export default function ShotForm({ beans, defaultBeanId, suggestedGrind, editingShot, saving, onSubmit, onCancel, targetTime = [26, 30], higherIsFiner = true }) {
   const [form, setForm] = useState(() =>
     editingShot
       ? { ...editingShot, grind: String(editingShot.grind), dose: String(editingShot.dose), time: String(editingShot.time), yield: String(editingShot.yield) }
       : blank(defaultBeanId, suggestedGrind),
   )
   const [error, setError] = useState('')
+  const [saved, setSaved] = useState('')
 
   const handleChange = (e) => {
     const { name, value } = e.target
     setForm((p) => ({ ...p, [name]: value }))
     setError('')
+    setSaved('')
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    const nums = { grind: Number(form.grind), dose: Number(form.dose), time: Number(form.time), yield: Number(form.yield) }
+    const nums = { grind: Math.round(Number(form.grind) * 100) / 100, dose: Number(form.dose), time: Number(form.time), yield: Number(form.yield) }
     if (!form.beanId) return setError('원두를 선택해 주세요.')
     if (Object.values(nums).some((n) => Number.isNaN(n) || n <= 0)) return setError('분쇄도·도징·추출 시간·추출량을 숫자로 입력해 주세요.')
     if (nums.grind < 1 || nums.grind > 15) return setError('분쇄도 값이 너무 커요/작아요. 다이얼 숫자를 확인해 주세요.')
     if (nums.time > 90) return setError('추출 시간은 초 단위로 입력해 주세요.')
 
     const ok = await onSubmit({ ...form, ...nums })
-    if (ok && !editingShot) setForm(blank(form.beanId, form.grind))
+    if (ok && !editingShot) {
+      // 빠름/느림이면 다음 샷 분쇄도를 0.1 조정해서 미리 넣어 둠 (다이얼 방향 반영)
+      const j = judgeTime(nums.time, targetTime, higherIsFiner)
+      const step = j.status === 'fast' ? 0.1 : j.status === 'slow' ? -0.1 : 0
+      const next = Math.round((nums.grind + (higherIsFiner === false ? -step : step)) * 10) / 10
+      setForm(blank(form.beanId, String(next)))
+      setSaved(j.status === 'ok' ? `기록했어요. ${nums.time}초 적정, 지금 세팅 유지` : `기록했어요. ${nums.time}초 ${j.label} → 다음 샷은 ${next.toFixed(1)}(${j.status === 'fast' ? '가늘게' : '굵게'})로 넣어 뒀어요`)
+    }
   }
 
   if (beans.length === 0) return <div className="card placeholder">재고 페이지의 "품목·현재 재고" 탭에서 분류가 "원두"인 품목을 먼저 등록해 주세요.</div>
@@ -40,6 +50,7 @@ export default function ShotForm({ beans, defaultBeanId, suggestedGrind, editing
   return (
     <form className="card form" onSubmit={handleSubmit}>
       <h2>{editingShot ? '샷 기록 수정' : '샷 기록'}</h2>
+      {saved && <p className="notice">✓ {saved}</p>}
       <div className="row">
         <label>
           일시
