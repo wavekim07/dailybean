@@ -20,12 +20,17 @@ export const initialState = {
     photo: 'table', // 배경 사진 (utils/photos.js의 id, 또는 'custom')
     customPhoto: null, // 사용자가 올린 사진 (data URL)
     rewardThreshold: 45000, // 무료 음료 쿠폰 기준 누적 금액
-    shortageRate: 0.7, // 기본 발주량에서 70% 이상 줄면 재고 부족 경고
+    shortageRate: 0.7,
+    currentStaffId: null, // 지금 근무자 (로그인 없이 이름만 고름)
+    checklists: { open: [], close: [] }, // 오픈·마감 확인 항목 [{ id, text }] — 매장이 직접 정함 // 기본 발주량에서 70% 이상 줄면 재고 부족 경고
   },
   items: [], // { id, name, category, unit, orderQty }  orderQty = 기본 발주량
   stockIns: [], // { id, date, itemId, qty, roastDate }
   counts: [], // { id, date, itemId, qty }  마감 실사
   shots: [], // { id, datetime, beanId, grind, dose, time, yield, memo, recommended, weather }
   sales: [], // { id, date, card, cash, memo, weather }
-  customers: [], // { id, name, phone, accAmount, coupons, history }
+  customers: [],
+  staff: [], // { id, name }
+  notes: [], // 인수인계 { id, datetime, staffId, text, done, doneBy, doneAt }
+  checkLogs: [], // 체크리스트 기록 { id, date, type, itemId, staffId, at } // { id, name, phone, accAmount, coupons, history }
 }

@@ -18,7 +18,8 @@ export default function GrindRecommendCard({ rec, beans, beanId, onBeanChange, b
 
       {resting && <p className="warn">⚠️ 로스팅 {restDays}일차 원두예요. 아직 숙성 중이라 가스가 많아요.</p>}
       {!roastDate && beanId && <p className="muted">이 원두의 로스팅 날짜 입고 기록이 없어 숙성 보정은 빠졌어요.</p>}
-      {!weather && !loading && <p className="muted">날씨를 못 불러와서 기준값으로 보여드려요.</p>}
+      {weather && <p className="muted">지금 {weather.current.temp}℃ · 습도 {weather.current.humidity}% 기준</p>}
+      {!weather && !loading && <p className="muted">날씨를 못 불러와서 기준값으로 보여드려요. {rec.reload && <button className="link-btn" onClick={rec.reload}>다시 시도</button>}</p>}
 
       {parts.length > 0 && (
         <ul className="reason">

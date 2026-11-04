@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import PhotoPicker from '../../components/photo/PhotoPicker.jsx'
+import StaffPicker from '../../components/common/StaffPicker.jsx'
+import Handoff from '../Ops/Handoff.jsx'
 import { useApp } from '../../context/AppContext.jsx'
 import useGrindRecommendation from '../../hooks/useGrindRecommendation.js'
 import { lowStockItems, orderQtyOf } from '../../utils/stockCalc.js'
@@ -42,7 +44,7 @@ export default function Dashboard() {
         <div className="hero-inner">
           <div className="hero-top">
             <span className="hero-store">{settings.store.name || '데일리빈'} · {settings.location.name}</span>
-            <button className="chip-btn" onClick={() => setPicking(true)}>사진 바꾸기</button>
+            <span className="hero-actions"><StaffPicker dark /><button className="chip-btn" onClick={() => setPicking(true)}>사진</button></span>
           </div>
           <h1 className="hero-title">{greeting(now.getHours())}</h1>
           <p className="hero-date">{now.getMonth() + 1}월 {now.getDate()}일 {DAYS[now.getDay()]}요일</p>
@@ -59,7 +61,36 @@ export default function Dashboard() {
             )}
           </div>
 
-          <div className="grind-panel">
+          <div className="grind-panel today-panel">
+            <div className="grind-panel-head"><span>오늘 할 일</span><Link className="link" to="/ops">운영 →</Link></div>
+            <div className="today-checks">
+              {[['open', '오픈'], ['close', '마감']].map(([k, label]) => {
+                const list = settings.checklists[k]
+                const done = list.filter((i) => state.checkLogs.some((c) => c.date === today && c.kind === k && c.itemId === i.id)).length
+                return (
+                  <Link key={k} to="/ops?tab=today" className="today-check">
+                    <span>{label} 확인</span>
+                    <strong>{list.length ? `${done}/${list.length}` : '항목 없음'}</strong>
+                    <span className="progress"><span className="bar" style={{ width: list.length ? `${(done / list.length) * 100}%` : 0 }} /></span>
+                  </Link>
+                )
+              })}
+              <Link to="/ops?tab=stock" className={`today-check ${low.length ? 'alert' : ''}`}>
+                <span>재고</span>
+                <strong>{items.length === 0 ? '등록 전' : low.length ? `${low.length}개 부족` : '여유'}</strong>
+                <span className="glance-sub">{low.slice(0, 2).map((l) => l.item.name).join(', ') || '발주 걱정 없어요'}</span>
+              </Link>
+            </div>
+            <h3 className="sub-title">인수인계 <Link className="link" to="/ops?tab=handoff">남기기</Link></h3>
+            <Handoff compact />
+          </div>
+        </div>
+        <a className="hero-credit" href="https://open-meteo.com/" target="_blank" rel="noreferrer">Weather data by Open-Meteo.com</a>
+      </div>
+
+      {/* 2. 분쇄도와 매출 */}
+      <div className="dash-columns">
+          <div className="panel grind-home">
             <div className="grind-panel-head">
               <span>오늘 추천 분쇄도</span>
               {beans.length > 0 && (
@@ -88,33 +119,20 @@ export default function Dashboard() {
               <span className="muted-light">오늘 기록 {todayShots}잔</span>
             </div>
           </div>
+        <div className="panel">
+          <div className="panel-title"><h2>매출</h2><Link className="link" to="/sales">자세히</Link></div>
+          <div className="sales-sum">
+            <div><span className="muted">오늘</span><strong>{todaySale ? won(total(todaySale)) : '입력 전'}</strong></div>
+            <div><span className="muted">이번 주</span><strong>{won(week.total)}</strong></div>
+          </div>
+          {todaySale?.memo && <p className="muted" style={{ marginTop: 8 }}>메모: {todaySale.memo}</p>}
         </div>
-        <a className="hero-credit" href="https://open-meteo.com/" target="_blank" rel="noreferrer">Weather data by Open-Meteo.com</a>
       </div>
 
-      {/* 2. 오늘 챙길 것 한눈에 */}
-      <div className="glance">
-        <Link to="/stock" className={`glance-item ${low.length ? 'alert' : ''}`}>
-          <span className="glance-label">재고</span>
-          <strong>{items.length === 0 ? '품목 등록 전' : low.length ? `${low.length}개 부족` : '여유 있음'}</strong>
-          <span className="glance-sub">{low.slice(0, 2).map((l) => l.item.name).join(', ') || '발주 걱정 없어요'}</span>
-        </Link>
-        <Link to="/sales" className="glance-item">
-          <span className="glance-label">오늘 매출</span>
-          <strong>{todaySale ? won(total(todaySale)) : '입력 전'}</strong>
-          <span className="glance-sub">이번 주 {won(week.total)}</span>
-        </Link>
-        <Link to="/customers" className="glance-item">
-          <span className="glance-label">단골</span>
-          <strong>{state.customers.length}명</strong>
-          <span className="glance-sub">쿠폰 보유 {state.customers.filter((c) => c.coupons > 0).length}명</span>
-        </Link>
-      </div>
-
-      {/* 3. 교대 인수인계: 최근 샷 */}
+      {/* 3. 최근 샷과 발주 확인 */}
       <div className="dash-columns">
         <div className="panel">
-          <div className="panel-title"><h2>최근 샷 · 인수인계</h2><Link className="link" to="/grind">전체 보기</Link></div>
+          <div className="panel-title"><h2>최근 샷</h2><Link className="link" to="/grind">전체 보기</Link></div>
           {recent.length === 0 && <p className="muted">아직 샷 기록이 없어요. 첫 샷을 기록하면 다음 근무자가 바로 볼 수 있어요.</p>}
           <ol className="timeline">
             {recent.map((s) => {

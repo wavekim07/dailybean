@@ -3,7 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import Layout from './components/layout/Layout.jsx'
 import Dashboard from './pages/Dashboard/Dashboard.jsx'
 import GrindPage from './pages/Grind/GrindPage.jsx'
-import StockPage from './pages/Stock/StockPage.jsx'
+import OpsPage from './pages/Ops/OpsPage.jsx'
 import CustomersPage from './pages/Customers/CustomersPage.jsx'
 import SettingsPage from './pages/Settings/SettingsPage.jsx'
 import SetupPage from './pages/Setup/SetupPage.jsx'
@@ -17,8 +17,9 @@ export default function App() {
       <Route element={<Layout />}>
         <Route index element={<Dashboard />} />
         <Route path="grind" element={<GrindPage />} />
-        <Route path="stock" element={<StockPage />} />
-        <Route path="items" element={<Navigate to="/stock" replace />} />
+        <Route path="ops" element={<OpsPage />} />
+        <Route path="stock" element={<Navigate to="/ops?tab=stock" replace />} />
+        <Route path="items" element={<Navigate to="/ops?tab=stock" replace />} />
         <Route path="sales" element={<Suspense fallback={<p className="muted">불러오는 중…</p>}><SalesPage /></Suspense>} />
         <Route path="customers" element={<CustomersPage />} />
         <Route path="settings" element={<SettingsPage />} />

@@ -1,7 +1,6 @@
 import { useMemo, useState } from 'react'
 import PageHeader from '../../components/common/PageHeader.jsx'
 import ConfirmDialog from '../../components/common/ConfirmDialog.jsx'
-import WeatherCard from '../../components/grind/WeatherCard.jsx'
 import GrindRecommendCard from '../../components/grind/GrindRecommendCard.jsx'
 import { useApp } from '../../context/AppContext.jsx'
 import useGrindRecommendation from '../../hooks/useGrindRecommendation.js'
@@ -25,6 +24,7 @@ export default function GrindPage() {
   const [saving, setSaving] = useState(false)
   const [notice, setNotice] = useState('')
   const [filter, setFilter] = useState({ from: '', to: '', beanId: '', status: '' })
+  const [showFilter, setShowFilter] = useState(false)
 
   const beanName = (id) => items.find((i) => i.id === id)?.name ?? '(삭제된 원두)'
 
@@ -74,7 +74,6 @@ export default function GrindPage() {
       <PageHeader photo title="분쇄도" description="오늘 날씨와 원두 숙성도로 분쇄도를 추천하고 샷을 기록해요." />
       <div className="two-col">
         <div className="stack">
-          <WeatherCard location={settings.location.name} weather={rec.weather} loading={rec.loading} error={rec.error} onReload={rec.reload} />
           <GrindRecommendCard rec={rec} beans={beans} beanId={activeBeanId} onBeanChange={setBeanId} base={settings.grind.base} higherIsFiner={settings.grind.higherIsFiner !== false} grinder={settings.store.grinder} />
           <ShotForm
             key={editingShot?.id ?? `new-${activeBeanId}-${rec.weather ? 'w' : 'n'}`}
@@ -89,7 +88,11 @@ export default function GrindPage() {
           {notice && <p className="muted">{notice}</p>}
         </div>
         <div>
-          <div className="card form filters">
+          <div className="list-head">
+            <h2>샷 기록</h2>
+            <button className="btn" onClick={() => setShowFilter((v) => !v)}>{showFilter ? '검색 닫기' : '검색'}</button>
+          </div>
+          {showFilter && <div className="card form filters">
             <div className="row">
               <label>시작일<input className="input" type="date" name="from" value={filter.from} onChange={setF} /></label>
               <label>종료일<input className="input" type="date" name="to" value={filter.to} onChange={setF} /></label>
@@ -112,7 +115,7 @@ export default function GrindPage() {
                 </select>
               </label>
             </div>
-          </div>
+          </div>}
           <ShotAverages shots={shots} beanName={beanName} grinder={settings.store.grinder} />
           <p className="muted count">{filtered.length}개 / 전체 {shots.length}개</p>
           <ShotList shots={filtered} beanName={beanName} targetTime={settings.grind.targetTime} higherIsFiner={settings.grind.higherIsFiner} onEdit={setEditingShot} onDelete={setDeleteTarget} />

@@ -8,7 +8,7 @@ import DailyCountForm from './DailyCountForm.jsx'
 import UsageTable from './UsageTable.jsx'
 import ItemsPanel from './ItemsPanel.jsx'
 
-export default function StockPage() {
+export default function StockPage({ embedded = false }) {
   const { state, dispatch } = useApp()
   const { items, stockIns, counts, settings } = state
   const [date, setDate] = useState(toDateStr())
@@ -20,8 +20,8 @@ export default function StockPage() {
 
   return (
     <section>
-      <PageHeader photo title="재고" description="품목과 현재 재고를 관리하고, 입고와 마감 실사를 기록해요." />
-      <div className="tabs page-tabs">
+      {!embedded && <PageHeader photo title="재고" description="품목과 현재 재고를 관리하고, 입고와 마감 실사를 기록해요." />}
+      <div className="tabs page-tabs sub-tabs">
         <button className={`tab ${tab === 'items' ? 'active' : ''}`} onClick={() => setTab('items')}>품목·현재 재고</button>
         <button className={`tab ${tab === 'daily' ? 'active' : ''}`} onClick={() => setTab('daily')}>입고·마감 실사</button>
       </div>

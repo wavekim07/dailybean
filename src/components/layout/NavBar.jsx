@@ -2,8 +2,8 @@ import { NavLink } from 'react-router-dom'
 
 const MENUS = [
   { to: '/', label: '홈', icon: '🏠' },
+  { to: '/ops', label: '운영', icon: '📋' },
   { to: '/grind', label: '분쇄도', icon: '☕' },
-  { to: '/stock', label: '재고', icon: '📦' },
   { to: '/sales', label: '매출', icon: '📊' },
   { to: '/customers', label: '고객', icon: '🎟️' },
   { to: '/settings', label: '설정', icon: '⚙️' },

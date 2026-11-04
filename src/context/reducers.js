@@ -13,6 +13,11 @@ const add = (list, data) => [...list, { id: newId(), ...data }]
 const update = (list, data) => list.map((x) => (x.id === data.id ? { ...x, ...data } : x))
 const remove = (list, id) => list.filter((x) => x.id !== id)
 
+const nowStr = () => `${toDateStr()}T${new Date().toTimeString().slice(0, 5)}`
+
+// 기록에 "누가"를 붙임: 지금 근무자 (설정에서 고름)
+const withStaff = (state, data) => ({ staffId: state.settings.currentStaffId ?? null, ...data })
+
 export function rootReducer(state, action) {
   const { type, payload } = action
   switch (type) {
@@ -26,20 +31,66 @@ export function rootReducer(state, action) {
 
     // 재고
     case 'ADD_STOCK_IN':
-      return { ...state, stockIns: add(state.stockIns, payload) }
+      return { ...state, stockIns: add(state.stockIns, withStaff(state, payload)) }
     case 'DELETE_STOCK_IN':
       return { ...state, stockIns: remove(state.stockIns, payload) }
     case 'SAVE_DAILY_COUNT': {
       // payload: { date, quantities: { [itemId]: qty } } 같은 날짜 기록은 덮어쓰기
       const { date, quantities } = payload
       const others = state.counts.filter((c) => c.date !== date)
-      const rows = Object.entries(quantities).map(([itemId, qty]) => ({ id: newId(), date, itemId, qty: Number(qty) }))
+      const rows = Object.entries(quantities).map(([itemId, qty]) => ({ id: newId(), date, itemId, qty: Number(qty), staffId: state.settings.currentStaffId ?? null }))
       return { ...state, counts: [...others, ...rows] }
+    }
+
+    // 근무자
+    case 'ADD_STAFF':
+      return { ...state, staff: add(state.staff, { name: payload }) }
+    case 'DELETE_STAFF':
+      return {
+        ...state, staff: remove(state.staff, payload),
+        settings: state.settings.currentStaffId === payload ? { ...state.settings, currentStaffId: null } : state.settings,
+      }
+    case 'SET_CURRENT_STAFF':
+      return { ...state, settings: { ...state.settings, currentStaffId: payload } }
+
+    // 인수인계 노트
+    case 'ADD_NOTE':
+      return { ...state, notes: add(state.notes, withStaff(state, { datetime: nowStr(), done: false, ...payload })) }
+    case 'TOGGLE_NOTE':
+      return {
+        ...state,
+        notes: state.notes.map((n) => (n.id !== payload ? n : n.done
+          ? { ...n, done: false, doneBy: null, doneAt: null }
+          : { ...n, done: true, doneBy: state.settings.currentStaffId ?? null, doneAt: nowStr() })),
+      }
+    case 'DELETE_NOTE':
+      return { ...state, notes: remove(state.notes, payload) }
+
+    // 오픈·마감 체크리스트 (항목은 settings.checklists, 체크 기록은 checkLogs)
+    case 'ADD_CHECK_ITEM': {
+      const { kind, text } = payload
+      const lists = state.settings.checklists
+      return { ...state, settings: { ...state.settings, checklists: { ...lists, [kind]: [...lists[kind], { id: newId(), text }] } } }
+    }
+    case 'DELETE_CHECK_ITEM': {
+      const { kind, id } = payload
+      const lists = state.settings.checklists
+      return { ...state, settings: { ...state.settings, checklists: { ...lists, [kind]: lists[kind].filter((x) => x.id !== id) } } }
+    }
+    case 'TOGGLE_CHECK': {
+      const { date, kind, itemId } = payload
+      const hit = state.checkLogs.find((c) => c.date === date && c.kind === kind && c.itemId === itemId)
+      return {
+        ...state,
+        checkLogs: hit
+          ? state.checkLogs.filter((c) => c !== hit)
+          : [...state.checkLogs, { id: newId(), date, kind, itemId, staffId: state.settings.currentStaffId ?? null, at: nowStr() }],
+      }
     }
 
     // 샷 기록
     case 'ADD_SHOT':
-      return { ...state, shots: add(state.shots, payload) }
+      return { ...state, shots: add(state.shots, withStaff(state, payload)) }
     case 'UPDATE_SHOT':
       return { ...state, shots: update(state.shots, payload) }
     case 'DELETE_SHOT':
@@ -47,7 +98,7 @@ export function rootReducer(state, action) {
 
     // 매출
     case 'ADD_SALE':
-      return { ...state, sales: add(state.sales, payload) }
+      return { ...state, sales: add(state.sales, withStaff(state, payload)) }
     case 'UPDATE_SALE':
       return { ...state, sales: update(state.sales, payload) }
     case 'DELETE_SALE':

@@ -319,3 +319,42 @@ button.chip { cursor: pointer; }
 .grinder-info .src a { color: var(--primary); text-decoration: underline; margin-right: 10px; }
 /* 표가 넓어도 화면 밖으로 밀리지 않게 */
 .two-col > *, .dash-columns > *, .grid > * { min-width: 0; }
+
+/* ===== 운영: 근무자·체크리스트·인수인계 ===== */
+.page-header-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.staff-chip { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; border-radius: 999px; padding: 4px 6px 4px 12px; background: var(--primary-soft); color: var(--primary); flex-shrink: 0; }
+.staff-chip select { font: inherit; font-size: 13px; border: none; background: transparent; color: inherit; font-weight: 700; padding: 2px; max-width: 110px; }
+.staff-chip.dark { background: rgba(0, 0, 0, 0.32); color: #fff; border: 1px solid rgba(255, 255, 255, 0.35); backdrop-filter: blur(8px); }
+.staff-chip.dark select option { color: var(--text); }
+a.staff-chip { padding: 6px 12px; }
+.hero-actions { display: flex; gap: 6px; align-items: center; }
+.today-panel .sub-title { display: flex; justify-content: space-between; align-items: center; margin-top: 14px; }
+.today-checks { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 10px; }
+.today-check { background: #f6f0e8; border-radius: 14px; padding: 10px; display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--muted); min-width: 0; }
+.today-check strong { font-size: 15px; color: var(--text); }
+.today-check .progress { height: 6px; }
+.today-check.alert { background: #fdf0ed; }
+.today-check.alert strong { color: var(--danger); }
+.grind-home .grind-panel-head { margin-bottom: 4px; }
+.notes { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.note { display: flex; gap: 10px; align-items: flex-start; background: #fffaf2; border-radius: 12px; padding: 10px 12px; }
+.note input { width: 20px; height: 20px; margin-top: 2px; accent-color: var(--primary); flex-shrink: 0; }
+.note-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.note-body p { font-size: 14px; white-space: pre-wrap; word-break: break-word; }
+.note.done { opacity: 0.6; }
+.note.done p { text-decoration: line-through; }
+.link-btn { font: inherit; font-size: 13px; background: none; border: none; color: var(--primary); cursor: pointer; padding: 4px 0; }
+.checklist { list-style: none; margin: 12px 0; padding: 0; display: flex; flex-direction: column; }
+.checklist li { display: flex; align-items: center; gap: 10px; padding: 12px 0; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+.checklist label { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; cursor: pointer; font-size: 15px; }
+.checklist input { width: 22px; height: 22px; accent-color: var(--primary); flex-shrink: 0; }
+.checklist li.checked .check-text { color: var(--muted); text-decoration: line-through; }
+.check-progress { margin-top: 12px; }
+.small-btn { padding: 4px 10px; font-size: 12px; }
+.sub-tabs .tab { font-size: 12px; }
+.list-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.list-head h2 { font-size: 16px; }
+.staff-list { display: flex; flex-wrap: wrap; gap: 6px; }
+.staff-list .link-btn { padding: 0 0 0 4px; font-size: 12px; }
+.today-check .progress { display: block; }
+.today-check .progress .bar { display: block; }

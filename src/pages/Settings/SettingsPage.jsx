@@ -19,6 +19,35 @@ const GRIND_FIELDS = [
   { key: 'restAdj', label: '숙성 중 보정', step: 0.05 },
 ]
 
+function StaffSetting({ staff, dispatch }) {
+  const [name, setName] = useState('')
+  const [msg, setMsg] = useState('')
+  const submit = (e) => {
+    e.preventDefault()
+    const n = name.trim()
+    if (!n) return
+    if (staff.some((s) => s.name === n)) return setMsg('이미 있는 이름이에요.')
+    dispatch({ type: 'ADD_STAFF', payload: n })
+    setName(''); setMsg('')
+  }
+  return (
+    <div className="card form">
+      <h2>근무자</h2>
+      <p className="muted">로그인 없이 이름만 등록해요. 화면 위에서 지금 근무자를 고르면 기록에 이름이 붙어요.</p>
+      <form className="row" onSubmit={submit}>
+        <input className="input" value={name} onChange={(e) => { setName(e.target.value); setMsg('') }} placeholder="이름" />
+        <button className="btn primary" type="submit">추가</button>
+      </form>
+      {msg && <p className="error">{msg}</p>}
+      <div className="staff-list">
+        {staff.map((s) => (
+          <span key={s.id} className="reason-chip">{s.name} <button className="link-btn danger-text" onClick={() => dispatch({ type: 'DELETE_STAFF', payload: s.id })} aria-label={`${s.name} 삭제`}>✕</button></span>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 function GrindSetting({ grind, onSave }) {
   const [form, setForm] = useState(() => ({ ...grind, t0: grind.targetTime[0], t1: grind.targetTime[1] }))
   const [msg, setMsg] = useState('')
@@ -158,6 +187,7 @@ export default function SettingsPage() {
         <PhotoPicker onDone={() => setNotice('배경 사진을 바꿨어요.')} />
       </div>
       <div className="grid half">
+        <StaffSetting staff={state.staff} dispatch={dispatch} />
         <LocationSetting location={settings.location} onSave={(location) => save({ location }, `매장 위치를 ${location.name}(으)로 바꿨어요.`)} />
         <RewardSetting key={settings.rewardThreshold} value={settings.rewardThreshold} onSave={(rewardThreshold) => save({ rewardThreshold }, '쿠폰 기준을 저장했어요.')} />
         <StockSetting key={settings.shortageRate} value={settings.shortageRate} onSave={(shortageRate) => save({ shortageRate }, '재고 부족 경고 기준을 저장했어요.')} />
