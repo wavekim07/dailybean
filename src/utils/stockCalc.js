@@ -5,9 +5,16 @@ const sum = (arr) => arr.reduce((s, x) => s + Number(x.qty), 0)
 
 // 같은 날 입고와 실사의 순서: 기록한 시각(at)으로 비교
 // 예: 오후에 실사 → 저녁에 발주 물건 입고 → 입고가 현재 재고에 더해져야 함
-// 예전 기록처럼 시각이 없으면, 그날 입고는 그날 실사에 이미 들어 있다고 봄 (마감 실사 기준)
-const inKey = (s) => `${s.date}T${s.at ? s.at.slice(11) : '00:00:00'}`
-const countKey = (c) => `${c.date}T${c.at ? c.at.slice(11) : '23:59:59'}`
+// 시각(at)은 발주 기능부터 저장하기 시작했음. 그래서
+//  - 둘 다 시각이 있으면: 시각으로 비교
+//  - 입고만 시각이 있으면: 그 실사는 시각 저장 전에 한 것이니 입고가 더 나중
+//  - 둘 다 없으면(예전 기록): 그날 입고는 그날 마감 실사에 이미 들어 있다고 봄
+const inAfterCount = (s, c) => {
+  if (s.date !== c.date) return s.date > c.date
+  if (s.at && c.at) return s.at > c.at
+  return !!s.at && !c.at
+}
+const countKey = (c) => `${c.date}T${c.at ? c.at.slice(11) : ''}`
 const latestCount = (list) => [...list].sort((a, b) => countKey(b).localeCompare(countKey(a)))[0] || null
 
 // 기본 발주량 (예전 데이터의 minQty도 호환)
@@ -29,8 +36,8 @@ export function usageRows(items, stockIns, counts, date, shortageRate) {
     const today = counts.find((c) => c.itemId === item.id && c.date === date)
     // 전날 실사 이후부터 오늘 실사 전까지의 입고를 합산 (실사를 하루 빠뜨려도 맞게, 오늘 실사 뒤 입고는 다음 날 몫)
     const ins = sum(stockIns.filter((s) => s.itemId === item.id
-      && (today ? inKey(s) <= countKey(today) : s.date <= date)
-      && (!prev || inKey(s) > countKey(prev))))
+      && (today ? !inAfterCount(s, today) : s.date <= date)
+      && (!prev || inAfterCount(s, prev))))
     const usage = prev && today ? prev.qty + ins - today.qty : null
     const low = today ? isLow(item, today.qty, shortageRate) : false
     return { item, prevQty: prev?.qty ?? null, prevDate: prev?.date ?? null, ins, todayQty: today?.qty ?? null, usage, low }
@@ -40,7 +47,7 @@ export function usageRows(items, stockIns, counts, date, shortageRate) {
 // 현재 추정 재고 = 가장 최근 실사 + 그 이후 입고
 export function currentStock(item, stockIns, counts) {
   const last = latestCount(counts.filter((c) => c.itemId === item.id))
-  const ins = sum(stockIns.filter((s) => s.itemId === item.id && (!last || inKey(s) > countKey(last))))
+  const ins = sum(stockIns.filter((s) => s.itemId === item.id && (!last || inAfterCount(s, last))))
   return (last ? last.qty : 0) + ins
 }
 
