@@ -1,7 +1,12 @@
-import { Outlet } from 'react-router-dom'
+import { Navigate, Outlet, useLocation } from 'react-router-dom'
+import { useApp } from '../../context/AppContext.jsx'
 import NavBar from './NavBar.jsx'
 
 export default function Layout() {
+  const { state } = useApp()
+  const { pathname } = useLocation()
+  // 매장 시작 설정을 아직 안 했으면 먼저 설정 화면으로
+  if (!state.settings.store.setupDone && pathname !== '/setup') return <Navigate to="/setup" replace />
   return (
     <div className="layout">
       <NavBar />

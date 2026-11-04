@@ -1,6 +1,6 @@
 import { signed } from '../../utils/grindCalc.js'
 
-export default function GrindRecommendCard({ rec, beans, beanId, onBeanChange, base }) {
+export default function GrindRecommendCard({ rec, beans, beanId, onBeanChange, base, higherIsFiner = true, grinder }) {
   const { value, parts, resting, roastDate, restDays, adjust, weather, loading } = rec
 
   return (
@@ -14,7 +14,7 @@ export default function GrindRecommendCard({ rec, beans, beanId, onBeanChange, b
         )}
       </div>
       <p className="grind-value">{loading && !weather ? '…' : value.toFixed(1)}</p>
-      <p className="muted">기준 {base.toFixed(1)} · 숫자가 높을수록 가늘게</p>
+      <p className="muted">{grinder ? `${grinder} · ` : ''}기준 {base.toFixed(1)} · 숫자가 높을수록 {higherIsFiner ? '가늘게' : '굵게'}</p>
 
       {resting && <p className="warn">⚠️ 로스팅 {restDays}일차 원두예요. 아직 숙성 중이라 가스가 많아요.</p>}
       {!roastDate && beanId && <p className="muted">이 원두의 로스팅 날짜 입고 기록이 없어 숙성 보정은 빠졌어요.</p>}
@@ -25,7 +25,7 @@ export default function GrindRecommendCard({ rec, beans, beanId, onBeanChange, b
           {parts.map((p) => (
             <li key={p.label}>
               <span>{p.label}</span>
-              <span className={p.value > 0 ? 'finer' : p.value < 0 ? 'coarser' : ''}>{signed(p.value)}</span>
+              <span className={p.value * (higherIsFiner ? 1 : -1) > 0 ? 'finer' : p.value !== 0 ? 'coarser' : ''}>{signed(p.value)}</span>
             </li>
           ))}
         </ul>

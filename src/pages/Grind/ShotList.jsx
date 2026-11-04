@@ -1,13 +1,13 @@
 import { judgeTime } from '../../utils/grindCalc.js'
 import { weatherText } from '../../utils/weatherApi.js'
 
-export default function ShotList({ shots, beanName, targetTime, onEdit, onDelete }) {
+export default function ShotList({ shots, beanName, targetTime, higherIsFiner, onEdit, onDelete }) {
   if (shots.length === 0) return <div className="card placeholder">조건에 맞는 샷 기록이 없어요.</div>
 
   return (
     <ul className="list">
       {shots.map((s) => {
-        const j = judgeTime(s.time, targetTime)
+        const j = judgeTime(s.time, targetTime, higherIsFiner)
         return (
           <li key={s.id} className="card shot-row">
             <div className="shot-main">

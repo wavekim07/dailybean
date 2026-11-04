@@ -21,8 +21,11 @@ export function logAdjustment(shots, beanId) {
 }
 
 /**
- * 분쇄도 추천 (숫자가 높을수록 가늘게)
- * 추천 = 기준값 − a×(습도−기준습도)/10 − b×(기온−기준기온)/10 + 숙성보정 + 기록보정
+ * 분쇄도 추천
+ * 추천 = 기준값 + 방향×(− a×(습도−기준습도)/10 − b×(기온−기준기온)/10 + 숙성보정) + 기록보정
+ * 방향: 그라인더가 '숫자 높을수록 가늘게'면 +1, '숫자 높을수록 굵게'면 −1
+ *   (보정값은 '+ = 가늘게' 기준으로 정해 두고, 다이얼 방향에 맞게 부호만 바꿈.
+ *    기록보정은 실제 다이얼 숫자 차이라서 방향을 바꾸지 않음)
  * @param weather { humidity, temp }
  * @param g settings.grind
  * @param options { roastDate, onDate, logAdj }
@@ -30,11 +33,12 @@ export function logAdjustment(shots, beanId) {
  */
 export function calcGrind(weather, g, { roastDate = null, onDate = toDateStr(), logAdj = null } = {}) {
   const parts = []
+  const dir = g.higherIsFiner === false ? -1 : 1
   let v = g.base
 
   if (weather) {
-    const h = (-g.a * (weather.humidity - g.baseHumidity)) / 10
-    const t = (-g.b * (weather.temp - g.baseTemp)) / 10
+    const h = (dir * -g.a * (weather.humidity - g.baseHumidity)) / 10
+    const t = (dir * -g.b * (weather.temp - g.baseTemp)) / 10
     v += h + t
     parts.push({ label: `습도 ${weather.humidity}%`, value: h })
     parts.push({ label: `기온 ${weather.temp}℃`, value: t })
@@ -44,8 +48,8 @@ export function calcGrind(weather, g, { roastDate = null, onDate = toDateStr(), 
   if (roastDate) {
     restDays = daysBetween(roastDate, onDate)
     if (restDays <= g.restDays) {
-      v += g.restAdj
-      parts.push({ label: `로스팅 ${restDays}일차 (숙성 중)`, value: g.restAdj })
+      v += dir * g.restAdj
+      parts.push({ label: `로스팅 ${restDays}일차 (숙성 중)`, value: dir * g.restAdj })
     }
   }
 
@@ -58,9 +62,11 @@ export function calcGrind(weather, g, { roastDate = null, onDate = toDateStr(), 
 }
 
 // 추출 시간 판정 → 다음 조정 방향
-export function judgeTime(time, [min, max]) {
-  if (time < min) return { status: 'fast', label: '빠름', tip: '+0.1 가늘게' }
-  if (time > max) return { status: 'slow', label: '느림', tip: '−0.1 굵게' }
+export function judgeTime(time, [min, max], higherIsFiner = true) {
+  const finer = higherIsFiner === false ? '−0.1' : '+0.1'
+  const coarser = higherIsFiner === false ? '+0.1' : '−0.1'
+  if (time < min) return { status: 'fast', label: '빠름', tip: `${finer} 가늘게` }
+  if (time > max) return { status: 'slow', label: '느림', tip: `${coarser} 굵게` }
   return { status: 'ok', label: '적정', tip: '유지' }
 }
 
@@ -76,4 +82,5 @@ export function findAdjustPoint(hourly, g, baseValue, opts, now = new Date()) {
   return null
 }
 
+// 근거 표시용: 다이얼 숫자 변화량
 export const signed = (n) => `${n > 0 ? '+' : n < 0 ? '−' : '±'}${Math.abs(n).toFixed(2)}`

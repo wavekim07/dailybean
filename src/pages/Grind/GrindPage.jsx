@@ -59,9 +59,9 @@ export default function GrindPage() {
         .filter((s) => !filter.from || s.datetime.slice(0, 10) >= filter.from)
         .filter((s) => !filter.to || s.datetime.slice(0, 10) <= filter.to)
         .filter((s) => !filter.beanId || s.beanId === filter.beanId)
-        .filter((s) => !filter.status || judgeTime(s.time, settings.grind.targetTime).status === filter.status)
+        .filter((s) => !filter.status || judgeTime(s.time, settings.grind.targetTime, settings.grind.higherIsFiner).status === filter.status)
         .sort((a, b) => b.datetime.localeCompare(a.datetime)),
-    [shots, filter, settings.grind.targetTime],
+    [shots, filter, settings.grind.targetTime, settings.grind.higherIsFiner],
   )
 
   const setF = (e) => setFilter((p) => ({ ...p, [e.target.name]: e.target.value }))
@@ -72,7 +72,7 @@ export default function GrindPage() {
       <div className="two-col">
         <div className="stack">
           <WeatherCard location={settings.location.name} weather={rec.weather} loading={rec.loading} error={rec.error} onReload={rec.reload} />
-          <GrindRecommendCard rec={rec} beans={beans} beanId={activeBeanId} onBeanChange={setBeanId} base={settings.grind.base} />
+          <GrindRecommendCard rec={rec} beans={beans} beanId={activeBeanId} onBeanChange={setBeanId} base={settings.grind.base} higherIsFiner={settings.grind.higherIsFiner !== false} grinder={settings.store.grinder} />
           <ShotForm
             key={editingShot?.id ?? `new-${activeBeanId}-${rec.weather ? 'w' : 'n'}`}
             beans={beans}
@@ -111,7 +111,7 @@ export default function GrindPage() {
             </div>
           </div>
           <p className="muted count">{filtered.length}개 / 전체 {shots.length}개</p>
-          <ShotList shots={filtered} beanName={beanName} targetTime={settings.grind.targetTime} onEdit={setEditingShot} onDelete={setDeleteTarget} />
+          <ShotList shots={filtered} beanName={beanName} targetTime={settings.grind.targetTime} higherIsFiner={settings.grind.higherIsFiner} onEdit={setEditingShot} onDelete={setDeleteTarget} />
         </div>
       </div>
       <ConfirmDialog

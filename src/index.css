@@ -202,3 +202,8 @@ textarea.input { resize: vertical; font-size: 15px; }
 .credit { margin: 24px 0 8px; text-align: center; font-size: 12px; }
 .credit a, .credit-inline { color: #888; }
 .credit-inline { display: block; margin-top: 8px; font-size: 12px; }
+
+/* 매장 시작 설정 */
+.radio-row { display: flex; flex-wrap: wrap; gap: 12px 20px; margin: 4px 0 8px; }
+.radio-row label { display: flex; flex-direction: row; align-items: center; gap: 6px; font-weight: normal; }
+.store-summary { margin-bottom: 16px; }

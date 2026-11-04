@@ -2,13 +2,14 @@ import { useRef, useState } from 'react'
 import PageHeader from '../../components/common/PageHeader.jsx'
 import ConfirmDialog from '../../components/common/ConfirmDialog.jsx'
 import { useApp } from '../../context/AppContext.jsx'
-import { searchCity } from '../../utils/weatherApi.js'
+import LocationSetting from '../../components/settings/LocationSetting.jsx'
+import { Link } from 'react-router-dom'
 import { toDateStr } from '../../utils/date.js'
 
 const GRIND_FIELDS = [
   { key: 'base', label: '기준 분쇄도', step: 0.1 },
-  { key: 'min', label: '최소 (가장 굵게)', step: 0.1 },
-  { key: 'max', label: '최대 (가장 가늘게)', step: 0.1 },
+  { key: 'min', label: '다이얼 최소값', step: 0.1 },
+  { key: 'max', label: '다이얼 최대값', step: 0.1 },
   { key: 'baseHumidity', label: '기준 습도 (%)', step: 1 },
   { key: 'baseTemp', label: '기준 기온 (℃)', step: 1 },
   { key: 'a', label: '습도 10%당 조정', step: 0.05 },
@@ -16,45 +17,6 @@ const GRIND_FIELDS = [
   { key: 'restDays', label: '숙성 기간 (일)', step: 1 },
   { key: 'restAdj', label: '숙성 중 보정', step: 0.05 },
 ]
-
-function LocationSetting({ location, onSave }) {
-  const [query, setQuery] = useState('')
-  const [results, setResults] = useState([])
-  const [msg, setMsg] = useState('')
-
-  const search = async (e) => {
-    e.preventDefault()
-    if (!query.trim()) return
-    setMsg('검색 중…')
-    try {
-      const r = await searchCity(query.trim())
-      setResults(r)
-      setMsg(r.length ? '' : '검색 결과가 없어요. 시·군 이름으로 검색해 보세요.')
-    } catch (err) {
-      setMsg(err.message)
-    }
-  }
-
-  return (
-    <div className="card form">
-      <h2>매장 위치 (날씨 기준)</h2>
-      <p>현재: <strong>{location.name}</strong> <span className="muted">({location.lat}, {location.lon})</span></p>
-      <form className="row" onSubmit={search}>
-        <input className="input" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="예: 의정부, 강남구" />
-        <button className="btn" type="submit">검색</button>
-      </form>
-      {msg && <p className="muted">{msg}</p>}
-      <ul className="list plain">
-        {results.map((r) => (
-          <li key={`${r.lat},${r.lon}`} className="list-row compact">
-            <span>{r.name} <span className="muted small">{r.detail}</span></span>
-            <button className="btn primary" onClick={() => { onSave({ name: r.name, lat: r.lat, lon: r.lon }); setResults([]); setQuery(''); setMsg('') }}>선택</button>
-          </li>
-        ))}
-      </ul>
-    </div>
-  )
-}
 
 function GrindSetting({ grind, onSave }) {
   const [form, setForm] = useState(() => ({ ...grind, t0: grind.targetTime[0], t1: grind.targetTime[1] }))
@@ -68,13 +30,13 @@ function GrindSetting({ grind, onSave }) {
     if ([...Object.values(next), t0, t1].some(Number.isNaN)) return setMsg('숫자로 입력해 주세요.')
     if (next.min > next.base || next.base > next.max) return setMsg('최소 ≤ 기준 ≤ 최대가 되게 입력해 주세요.')
     if (t0 >= t1) return setMsg('목표 추출 시간 범위를 확인해 주세요.')
-    onSave({ ...next, targetTime: [t0, t1] }) // 저장되면 부모가 key로 폼을 새로 만들고 안내는 부모가 표시
+    onSave({ ...next, higherIsFiner: grind.higherIsFiner, targetTime: [t0, t1] }) // 저장되면 부모가 key로 폼을 새로 만들고 안내는 부모가 표시
   }
 
   return (
     <form className="card form" onSubmit={submit}>
       <h2>분쇄도 기준값</h2>
-      <p className="muted">우리 매장 머신·그라인더 기준으로 맞춰 주세요. 숫자가 높을수록 가늘게.</p>
+      <p className="muted">우리 매장 그라인더 기준으로 맞춰 주세요. {grind.higherIsFiner === false ? '이 그라인더는 숫자가 높을수록 굵게' : '이 그라인더는 숫자가 높을수록 가늘게'} (매장 시작 설정에서 바꿀 수 있어요)</p>
       <div className="count-grid">
         {GRIND_FIELDS.map((f) => (
           <label key={f.key}>
@@ -184,6 +146,11 @@ export default function SettingsPage() {
     <section>
       <PageHeader title="설정" description="매장 위치, 분쇄도 기준값, 쿠폰 기준을 정해요." />
       {notice && <p className="notice">✓ {notice}</p>}
+      <div className="card store-summary">
+        <h2>우리 매장</h2>
+        <p><strong>{settings.store.name || '이름 없음'}</strong> · 머신 {settings.store.machine || '-'} · 그라인더 {settings.store.grinder || '-'}</p>
+        <Link className="btn" to="/setup">매장 시작 설정 다시 하기</Link>
+      </div>
       <div className="grid half">
         <LocationSetting location={settings.location} onSave={(location) => save({ location }, `매장 위치를 ${location.name}(으)로 바꿨어요.`)} />
         <RewardSetting key={settings.rewardThreshold} value={settings.rewardThreshold} onSave={(rewardThreshold) => save({ rewardThreshold }, '쿠폰 기준을 저장했어요.')} />

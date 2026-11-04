@@ -17,6 +17,7 @@ function loadState() {
       settings: {
         ...initialState.settings,
         ...saved.settings,
+        store: { ...initialState.settings.store, ...saved.settings?.store },
         grind: { ...initialState.settings.grind, ...saved.settings?.grind },
       },
     }

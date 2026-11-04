@@ -32,7 +32,7 @@ export default function Dashboard() {
       <div className="dash">
         <div className="stack">
           <WeatherCard location={settings.location.name} weather={rec.weather} loading={rec.loading} error={rec.error} onReload={rec.reload} />
-          <GrindRecommendCard rec={rec} beans={beans} beanId={activeBeanId} onBeanChange={setBeanId} base={settings.grind.base} />
+          <GrindRecommendCard rec={rec} beans={beans} beanId={activeBeanId} onBeanChange={setBeanId} base={settings.grind.base} higherIsFiner={settings.grind.higherIsFiner !== false} grinder={settings.store.grinder} />
           {beans.length === 0 && <p className="muted">재고 페이지에 원두를 등록하면 원두별 숙성 보정이 들어가요.</p>}
         </div>
         <div className="stack">
@@ -41,7 +41,7 @@ export default function Dashboard() {
             {recent.length === 0 && <p className="muted">아직 샷 기록이 없어요.</p>}
             <ul className="list plain">
               {recent.map((s) => {
-                const j = judgeTime(s.time, settings.grind.targetTime)
+                const j = judgeTime(s.time, settings.grind.targetTime, settings.grind.higherIsFiner)
                 return (
                   <li key={s.id} className="list-row compact">
                     <span className="muted small">{s.datetime.slice(5).replace('T', ' ')}</span>

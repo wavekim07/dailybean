@@ -6,6 +6,7 @@ import GrindPage from './pages/Grind/GrindPage.jsx'
 import StockPage from './pages/Stock/StockPage.jsx'
 import CustomersPage from './pages/Customers/CustomersPage.jsx'
 import SettingsPage from './pages/Settings/SettingsPage.jsx'
+import SetupPage from './pages/Setup/SetupPage.jsx'
 
 // 차트 라이브러리(Recharts)가 커서 매출 페이지는 필요할 때 불러오기
 const SalesPage = lazy(() => import('./pages/Sales/SalesPage.jsx'))
@@ -21,6 +22,7 @@ export default function App() {
         <Route path="sales" element={<Suspense fallback={<p className="muted">불러오는 중…</p>}><SalesPage /></Suspense>} />
         <Route path="customers" element={<CustomersPage />} />
         <Route path="settings" element={<SettingsPage />} />
+        <Route path="setup" element={<SetupPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>

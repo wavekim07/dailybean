@@ -1,9 +1,12 @@
 // PRD v0.2 / 설계 v0.1 기준 기본값
 export const initialState = {
   settings: {
+    // 매장 시작 설정 (처음 한 번). setupDone이 false면 /setup 화면으로 안내
+    store: { name: '', machine: '', grinder: '', setupDone: false },
     location: { name: '의정부', lat: 37.738, lon: 127.034 },
     grind: {
-      base: 6.5, // 다이얼 기준값 (높을수록 가늘게)
+      base: 6.5, // 다이얼 기준값
+      higherIsFiner: true, // 그라인더 다이얼 방향: 숫자가 높을수록 가늘게면 true
       min: 6.0,
       max: 7.0,
       baseHumidity: 60, // %
