@@ -71,14 +71,19 @@ export function weatherText(code) {
 
 export const isRainy = (code) => code >= 51 && code !== 71 && code !== 73 && code !== 75 && code !== 77 && code !== 85 && code !== 86
 
-// 도시 검색 (Open-Meteo 지오코딩)
+// 도시 검색 (Open-Meteo 지오코딩, GeoNames 자료)
+// - countryCode=KR: 한국 결과만
+// - 고개·산 같은 지형은 빼고 마을·도시(PPL…)와 행정구역(ADM…)만 보여 줌
+// - 2026-11-04 확인: '강남구', '서울'로는 서울 결과가 나오지 않음 → 화면에서 '현재 위치 사용'을 함께 제공
 export async function searchCity(name, signal) {
-  const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(name)}&count=5&language=ko&format=json`
+  const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(name)}&count=20&language=ko&format=json&countryCode=KR`
   const data = await getJson(url, signal)
-  return (data.results || []).map((r) => ({
-    name: r.name,
-    detail: [r.admin1, r.country].filter(Boolean).join(', '),
-    lat: Math.round(r.latitude * 1000) / 1000,
-    lon: Math.round(r.longitude * 1000) / 1000,
-  }))
+  return (data.results || [])
+    .filter((r) => !r.feature_code || r.feature_code.startsWith('PPL') || r.feature_code.startsWith('ADM'))
+    .map((r) => ({
+      name: r.name,
+      detail: [r.admin1, r.admin2, r.admin3].filter((x, i, arr) => x && x !== r.name && arr.indexOf(x) === i).join(' '),
+      lat: Math.round(r.latitude * 1000) / 1000,
+      lon: Math.round(r.longitude * 1000) / 1000,
+    }))
 }

@@ -6,6 +6,7 @@ import LocationSetting from '../../components/settings/LocationSetting.jsx'
 import PhotoPicker from '../../components/photo/PhotoPicker.jsx'
 import { Link } from 'react-router-dom'
 import { toDateStr } from '../../utils/date.js'
+import { validateBackup } from '../../utils/backup.js'
 
 const GRIND_FIELDS = [
   { key: 'base', label: '기준 분쇄도', step: 0.1 },
@@ -117,6 +118,7 @@ function BackupPanel({ state, dispatch }) {
   const fileRef = useRef(null)
   const [msg, setMsg] = useState('')
   const [confirmReset, setConfirmReset] = useState(false)
+  const [pending, setPending] = useState(null) // 검사를 통과한 백업 (확인 후 적용)
 
   const exportJson = () => {
     const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' })
@@ -132,14 +134,17 @@ function BackupPanel({ state, dispatch }) {
     if (!file) return
     const reader = new FileReader()
     reader.onload = () => {
+      let data
       try {
-        const data = JSON.parse(reader.result)
-        if (!data || typeof data !== 'object' || !('items' in data || 'shots' in data)) throw new Error()
-        dispatch({ type: 'IMPORT_ALL', payload: data })
-        setMsg('백업을 불러왔어요.')
+        data = JSON.parse(reader.result)
       } catch {
-        setMsg('데일리빈 백업 파일이 아니에요.')
+        setMsg('파일이 손상됐거나 JSON 형식이 아니에요. 지금 데이터는 그대로예요.')
+        e.target.value = ''
+        return
       }
+      const check = validateBackup(data)
+      if (!check.ok) setMsg(`${check.error} 지금 데이터는 그대로예요.`)
+      else setPending({ data, summary: check.summary })
       e.target.value = ''
     }
     reader.readAsText(file)
@@ -156,6 +161,9 @@ function BackupPanel({ state, dispatch }) {
         <input ref={fileRef} type="file" accept="application/json" hidden onChange={importJson} />
       </div>
       {msg && <p className="muted">{msg}</p>}
+      <ConfirmDialog open={!!pending} message={pending && `지금 데이터를 백업 내용으로 바꿀까요? ${pending.summary}`}
+        onConfirm={() => { dispatch({ type: 'IMPORT_ALL', payload: pending.data }); setPending(null); setMsg('백업을 불러왔어요.') }}
+        onCancel={() => { setPending(null); setMsg('불러오기를 취소했어요.') }} />
       <ConfirmDialog open={confirmReset} message="모든 데이터를 지울까요? 되돌릴 수 없어요."
         onConfirm={() => { dispatch({ type: 'RESET_ALL' }); setConfirmReset(false); setMsg('초기화했어요.') }}
         onCancel={() => setConfirmReset(false)} />

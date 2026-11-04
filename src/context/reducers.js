@@ -35,9 +35,10 @@ export function rootReducer(state, action) {
     case 'DELETE_STOCK_IN':
       return { ...state, stockIns: remove(state.stockIns, payload) }
     case 'SAVE_DAILY_COUNT': {
-      // payload: { date, quantities: { [itemId]: qty } } 같은 날짜 기록은 덮어쓰기
+      // payload: { date, quantities: { [itemId]: qty } }
+      // 같은 날짜에서 이번에 입력한 품목의 기록만 바꾸고, 입력하지 않은 품목의 기록은 그대로 둠
       const { date, quantities } = payload
-      const others = state.counts.filter((c) => c.date !== date)
+      const others = state.counts.filter((c) => !(c.date === date && c.itemId in quantities))
       const rows = Object.entries(quantities).map(([itemId, qty]) => ({ id: newId(), date, itemId, qty: Number(qty), staffId: state.settings.currentStaffId ?? null }))
       return { ...state, counts: [...others, ...rows] }
     }
@@ -142,8 +143,19 @@ export function rootReducer(state, action) {
         ...state,
         settings: { ...state.settings, ...payload, grind: { ...state.settings.grind, ...(payload.grind || {}) } },
       }
-    case 'IMPORT_ALL':
-      return { ...initialState, ...payload }
+    case 'IMPORT_ALL': {
+      // 설정은 한 단계 안쪽까지 기본값과 합쳐서, 예전 백업이어도 빠진 설정이 기본값으로 채워지게
+      const s = payload.settings || {}
+      return {
+        ...initialState, ...payload,
+        settings: {
+          ...initialState.settings, ...s,
+          store: { ...initialState.settings.store, ...s.store },
+          checklists: { ...initialState.settings.checklists, ...s.checklists },
+          grind: { ...initialState.settings.grind, ...s.grind },
+        },
+      }
+    }
     case 'RESET_ALL':
       return initialState
 
