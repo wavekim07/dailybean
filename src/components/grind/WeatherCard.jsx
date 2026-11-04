@@ -17,6 +17,7 @@ export default function WeatherCard({ location, weather, loading, error, onReloa
           <span className="tag">{weatherText(weather.current.code)}</span>
         </div>
       )}
+      <a className="credit-inline" href="https://open-meteo.com/" target="_blank" rel="noreferrer">Weather data by Open-Meteo.com</a>
     </div>
   )
 }

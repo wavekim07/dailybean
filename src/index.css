@@ -197,3 +197,8 @@ textarea.input { resize: vertical; font-size: 15px; }
 .small-bar { height: 6px; margin-top: 6px; max-width: 220px; }
 .progress .bar.danger { background: var(--danger); }
 .low-row { border-color: #e8a49b; background: #fdf3f1; }
+
+/* 날씨 데이터 출처 (Open-Meteo 이용 조건) */
+.credit { margin: 24px 0 8px; text-align: center; font-size: 12px; }
+.credit a, .credit-inline { color: #888; }
+.credit-inline { display: block; margin-top: 8px; font-size: 12px; }

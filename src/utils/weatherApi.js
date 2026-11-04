@@ -1,3 +1,4 @@
+import { toDateStr } from './date.js'
 // Open-Meteo (API 키 없음) https://open-meteo.com/
 const FORECAST = 'https://api.open-meteo.com/v1/forecast'
 const ARCHIVE = 'https://archive-api.open-meteo.com/v1/archive'
@@ -35,15 +36,20 @@ export async function fetchTodayWeather(lat, lon, signal) {
   }
 }
 
-// 특정 일시(YYYY-MM-DDTHH:mm)의 날씨. 최근 3개월은 forecast, 그보다 오래되면 archive
+// 특정 일시(YYYY-MM-DDTHH:mm)의 날씨
+// 공식 문서(open-meteo.com/en/docs)에 맞춘 방식:
+//  - 오늘~92일 전: forecast API의 past_days(0~92)로 지난 날까지 받아서 그 시각을 찾음
+//  - 그보다 오래된 날: archive API(start_date/end_date)
 export async function fetchWeatherAt(lat, lon, datetime, signal) {
   const date = datetime.slice(0, 10)
-  const hour = Number(datetime.slice(11, 13))
-  const ageDays = (Date.now() - new Date(date).getTime()) / 86400000
-  const base = ageDays > 85 ? ARCHIVE : FORECAST
-  const url = `${base}?latitude=${lat}&longitude=${lon}&hourly=${HOURLY}&timezone=Asia%2FSeoul&start_date=${date}&end_date=${date}`
+  const hourKey = `${date}T${datetime.slice(11, 13)}:00`
+  const daysAgo = Math.max(0, Math.round((new Date(toDateStr(new Date())) - new Date(date)) / 86400000))
+  const url = daysAgo <= 92
+    ? `${FORECAST}?latitude=${lat}&longitude=${lon}&hourly=${HOURLY}&timezone=Asia%2FSeoul&past_days=${daysAgo}&forecast_days=1`
+    : `${ARCHIVE}?latitude=${lat}&longitude=${lon}&hourly=${HOURLY}&timezone=Asia%2FSeoul&start_date=${date}&end_date=${date}`
   const data = await getJson(url, signal)
-  const i = Math.min(hour, data.hourly.time.length - 1)
+  const i = data.hourly.time.indexOf(hourKey)
+  if (i < 0) throw new Error('그 시각의 날씨 기록을 찾지 못했어요.')
   return {
     temp: data.hourly.temperature_2m[i],
     humidity: data.hourly.relative_humidity_2m[i],
