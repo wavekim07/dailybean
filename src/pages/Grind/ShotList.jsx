@@ -1,5 +1,6 @@
 import { judgeTime, ratioText } from '../../utils/grindCalc.js'
 import { weatherText } from '../../utils/weatherApi.js'
+import { TASTE_AXES, levelText } from '../../utils/taste.js'
 
 export default function ShotList({ shots, beanName, targetTime, higherIsFiner, unit = 'g', onEdit, onDelete }) {
   if (shots.length === 0) return <div className="card placeholder">조건에 맞는 샷 기록이 없어요.</div>
@@ -20,6 +21,11 @@ export default function ShotList({ shots, beanName, targetTime, higherIsFiner, u
                 <span>{s.dose}g → {s.yield}{unit} ({ratioText(s.dose, s.yield)})</span>
                 <span>{s.time}초 <span className={`tag ${j.status}`}>{j.label}</span></span>
               </div>
+              {s.taste && (
+                <div className="reason-chips">
+                  {TASTE_AXES.filter((a) => s.taste[a.key] != null).map((a) => <span key={a.key} className={`reason-chip ${s.taste[a.key] === 0 ? 'ok-chip' : ''}`}>{a.label} {levelText(a.key, s.taste[a.key])}</span>)}
+                </div>
+              )}
               <div className="muted small">
                 {s.weather ? `${weatherText(s.weather.code)} ${s.weather.temp}℃ · 습도 ${s.weather.humidity}%` : '날씨 정보 없음'}
                 {s.recommended != null && ` · 당시 추천 ${s.recommended.toFixed(1)}`}

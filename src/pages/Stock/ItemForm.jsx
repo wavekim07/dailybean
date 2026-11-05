@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { CATEGORIES, UNITS } from '../../constants/categories.js'
+import { BODY_TARGETS } from '../../utils/taste.js'
 
 const EMPTY = { name: '', category: CATEGORIES[0], unit: UNITS[0], orderQty: '', supplier: '', currentQty: '' }
 
@@ -56,6 +57,17 @@ export default function ItemForm({ editingItem, existingNames, onSubmit, onCance
           <input className="input" name="orderQty" inputMode="decimal" value={form.orderQty} onChange={handleChange} placeholder="예: 5" />
         </label>
       </div>
+      {form.category === '원두' && (
+        <div>
+          <span className="muted small">목표 맛 (진하기)</span>
+          <div className="radio-row">
+            {BODY_TARGETS.map((b) => (
+              <label key={b.id}><input type="radio" name="targetBody" checked={(form.targetBody ?? 'medium') === b.id} onChange={() => setForm((p) => ({ ...p, targetBody: b.id }))} /> {b.label}</label>
+            ))}
+          </div>
+          <span className="muted small">샷 맛 평가의 진하기를 이 목표와 비교해서 추출량을 제안해요.</span>
+        </div>
+      )}
       <label>
         거래처 (선택)
         <input className="input" name="supplier" value={form.supplier} onChange={handleChange} placeholder="예: OO유업, 원두 로스터리" />

@@ -1,4 +1,5 @@
 import { extractOf } from '../../utils/grindCalc.js'
+import { bodyTargetOf } from '../../utils/taste.js'
 import { useMemo, useState } from 'react'
 import PageHeader from '../../components/common/PageHeader.jsx'
 import ConfirmDialog from '../../components/common/ConfirmDialog.jsx'
@@ -30,6 +31,8 @@ export default function GrindPage() {
   const [filter, setFilter] = useState({ from: '', to: '', beanId: '', status: '' })
   const [showFilter, setShowFilter] = useState(false)
 
+  // 이 원두로 가장 최근에 맛 평가를 남긴 샷 (추천 카드에 "지난 샷 맛"으로 보여 줌)
+  const lastTasted = [...shots].filter((s) => s.beanId === activeBeanId && s.taste).sort((a, b) => b.datetime.localeCompare(a.datetime))[0] || null
   const beanName = (id) => items.find((i) => i.id === id)?.name ?? '(삭제된 원두)'
 
   // 저장할 때 그 시각 날씨를 API로 가져와 함께 저장하고, 날씨 기반 추천값도 기록 (나중에 보정에 사용)
@@ -78,7 +81,8 @@ export default function GrindPage() {
       <PageHeader photo title="분쇄도" description="오늘 날씨와 원두 숙성도로 분쇄도를 추천하고 샷을 기록해요." />
       <div className="two-col">
         <div className="stack">
-          <GrindRecommendCard rec={rec} beans={beans} beanId={activeBeanId} onBeanChange={setBeanId} base={settings.grind.base} higherIsFiner={settings.grind.higherIsFiner !== false} grinder={settings.store.grinder} extract={extractOf(settings.grind)} targetTime={settings.grind.targetTime} />
+          <GrindRecommendCard rec={rec} beans={beans} beanId={activeBeanId} onBeanChange={setBeanId} base={settings.grind.base} higherIsFiner={settings.grind.higherIsFiner !== false} grinder={settings.store.grinder} extract={extractOf(settings.grind)} targetTime={settings.grind.targetTime}
+            targetBody={bodyTargetOf(items.find((i) => i.id === activeBeanId))} lastTasted={lastTasted} yieldStep={Number(settings.grind.yieldStep ?? 2)} />
           <Guard perm="shots">
           <ShotForm
             key={editingShot?.id ?? `new-${activeBeanId}-${rec.weather ? 'w' : 'n'}`}
@@ -92,6 +96,8 @@ export default function GrindPage() {
             targetTime={settings.grind.targetTime}
             higherIsFiner={settings.grind.higherIsFiner !== false}
             extract={extractOf(settings.grind)}
+            targetBodyOf={(id) => bodyTargetOf(items.find((i) => i.id === id)).value}
+            yieldStep={Number(settings.grind.yieldStep ?? 2)}
           />
           </Guard>
           {notice && <p className="muted">{notice}</p>}

@@ -426,3 +426,12 @@ button.cal-cell { cursor: pointer; }
 .hourly-row .input { padding: 6px 10px; }
 .warn-inline { color: #8a5a00; }
 @media (min-width: 768px) { .hourly-grid { grid-template-columns: 1fr 1fr; } }
+
+/* 샷 맛 평가 */
+.taste { display: flex; flex-direction: column; gap: 6px; background: #f6f1ea; border-radius: 10px; padding: 10px 12px; }
+.taste-title { font-size: 13px; font-weight: 600; }
+.taste-row { display: flex; align-items: center; gap: 6px; }
+.taste-row > span { flex: 0 0 48px; font-size: 13px; color: var(--muted); }
+.taste-btn { flex: 1; font: inherit; font-size: 13px; padding: 8px 4px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); cursor: pointer; color: var(--text); }
+.taste-btn.on { background: var(--primary); border-color: var(--primary); color: #fff; font-weight: 700; }
+.ok-chip { background: #e3f4e6; color: #2d7a3e; }

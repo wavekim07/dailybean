@@ -112,15 +112,16 @@ function GrindSetting({ grind, onSave }) {
 // 추출 기준: 목표 도징량·추출량과 추출량 단위. 샷 기록 칸에 미리 채워지고, 추천 카드에 비율이 보임
 function ExtractSetting({ grind, onSave }) {
   const ex = extractOf(grind)
-  const [form, setForm] = useState({ dose: String(ex.dose), out: String(ex.yield), unit: ex.unit })
+  const [form, setForm] = useState({ dose: String(ex.dose), out: String(ex.yield), unit: ex.unit, step: String(grind.yieldStep ?? 2) })
   const [msg, setMsg] = useState('')
   const set = (k) => (e) => { setForm((p) => ({ ...p, [k]: e.target.value })); setMsg('') }
   const submit = (e) => {
     e.preventDefault()
     const dose = Number(form.dose)
     const out = Number(form.out)
-    if (!(dose > 0) || !(out > 0)) return setMsg('도징량과 추출량을 0보다 큰 숫자로 넣어 주세요.')
-    onSave({ targetDose: dose, targetYield: out, yieldUnit: form.unit })
+    const step = Number(form.step)
+    if (!(dose > 0) || !(out > 0) || !(step > 0)) return setMsg('도징량, 추출량, 조절 폭을 0보다 큰 숫자로 넣어 주세요.')
+    onSave({ targetDose: dose, targetYield: out, yieldUnit: form.unit, yieldStep: step })
   }
   return (
     <form className="card form" onSubmit={submit}>
@@ -129,6 +130,7 @@ function ExtractSetting({ grind, onSave }) {
       <div className="row">
         <label>목표 도징량 (g)<input className="input" inputMode="decimal" value={form.dose} onChange={set('dose')} /></label>
         <label>목표 추출량 ({form.unit})<input className="input" inputMode="decimal" value={form.out} onChange={set('out')} /></label>
+        <label>맛 평가로 바꿀 추출량 ({form.unit})<input className="input" inputMode="decimal" value={form.step} onChange={set('step')} /></label>
       </div>
       <div className="radio-row">
         <label><input type="radio" name="yieldUnit" checked={form.unit === 'g'} onChange={() => setForm((p) => ({ ...p, unit: 'g' }))} /> g (저울로 무게를 잼)</label>
@@ -287,7 +289,7 @@ export default function SettingsPage() {
         <RewardSetting key={settings.rewardThreshold} value={settings.rewardThreshold} onSave={(rewardThreshold) => save({ rewardThreshold }, '쿠폰 기준을 저장했어요.')} />
         <StockSetting key={settings.shortageRate} value={settings.shortageRate} onSave={(shortageRate) => save({ shortageRate }, '재고 부족 경고 기준을 저장했어요.')} />
         <GrindSetting key={JSON.stringify(settings.grind)} grind={settings.grind} onSave={(grind) => save({ grind }, '분쇄도 기준값을 저장했어요. 추천값에 바로 반영돼요.')} />
-        <ExtractSetting key={`ex-${settings.grind.targetDose}-${settings.grind.targetYield}-${settings.grind.yieldUnit}`} grind={settings.grind} onSave={(grind) => save({ grind }, '추출 기준을 저장했어요. 다음 샷 기록부터 이 값이 채워져요.')} />
+        <ExtractSetting key={`ex-${settings.grind.targetDose}-${settings.grind.targetYield}-${settings.grind.yieldUnit}-${settings.grind.yieldStep}`} grind={settings.grind} onSave={(grind) => save({ grind }, '추출 기준을 저장했어요. 다음 샷 기록부터 이 값이 채워져요.')} />
         <BackupPanel state={state} dispatch={dispatch} />
       </div>
     </section>
