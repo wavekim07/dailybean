@@ -14,6 +14,9 @@ export const initialState = {
       a: 0.2, // 습도 10%당 조정폭
       b: 0.1, // 기온 10℃당 조정폭
       targetTime: [26, 30], // 목표 추출 시간(초)
+      targetDose: 19, // 목표 도징량(g)
+      targetYield: 32, // 목표 추출량 (파도김 기준 32)
+      yieldUnit: 'g', // 추출량 단위: 'g'(저울) 또는 'ml'(샷잔 눈금)
       restDays: 3, // 로스팅 후 숙성 기간(일)
       restAdj: -0.1, // 숙성 기간 보정 (음수 = 굵게)
     },

@@ -1,6 +1,6 @@
-import { signed } from '../../utils/grindCalc.js'
+import { ratioText, signed } from '../../utils/grindCalc.js'
 
-export default function GrindRecommendCard({ rec, beans, beanId, onBeanChange, base, higherIsFiner = true, grinder }) {
+export default function GrindRecommendCard({ rec, beans, beanId, onBeanChange, base, higherIsFiner = true, grinder, extract, targetTime }) {
   const { value, parts, resting, roastDate, restDays, adjust, weather, loading } = rec
 
   return (
@@ -16,6 +16,7 @@ export default function GrindRecommendCard({ rec, beans, beanId, onBeanChange, b
       <p className="grind-value">{loading && !weather ? '…' : value.toFixed(1)}</p>
       <p className="muted">{grinder ? `${grinder} · ` : ''}기준 {base.toFixed(1)} · 숫자가 높을수록 {higherIsFiner ? '가늘게' : '굵게'}</p>
 
+      {extract && <p className="muted">목표 추출: {extract.dose}g → {extract.yield}{extract.unit} ({ratioText(extract.dose, extract.yield)}){targetTime ? `, ${targetTime[0]}~${targetTime[1]}초` : ''}</p>}
       {resting && <p className="warn">⚠️ 로스팅 {restDays}일차 원두예요. 아직 숙성 중이라 가스가 많아요.</p>}
       {!roastDate && beanId && <p className="muted">이 원두의 로스팅 날짜 입고 기록이 없어 숙성 보정은 빠졌어요.</p>}
       {weather && <p className="muted">지금 {weather.current.temp}℃ · 습도 {weather.current.humidity}% 기준</p>}

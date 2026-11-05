@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { judgeTime } from '../../utils/grindCalc.js'
+import { judgeTime, ratioText } from '../../utils/grindCalc.js'
 
 const nowLocal = () => {
   const d = new Date()
@@ -7,14 +7,16 @@ const nowLocal = () => {
   return d.toISOString().slice(0, 16)
 }
 
-const blank = (beanId, grind) => ({ datetime: nowLocal(), beanId: beanId ?? '', grind: grind ?? '', dose: '19.2', time: '', yield: '32', memo: '' })
+// 도징·추출량은 설정의 추출 기준으로 미리 채움 (실제로 다르게 뽑았으면 고쳐서 저장)
+const blank = (beanId, grind, extract) => ({ datetime: nowLocal(), beanId: beanId ?? '', grind: grind ?? '', dose: String(extract.dose), time: '', yield: String(extract.yield), memo: '' })
+const DEFAULT_EXTRACT = { dose: 19, yield: 32, unit: 'g' }
 
 // editingShot이 있으면 수정 모드. 부모가 key로 다시 만들어 초기화
-export default function ShotForm({ beans, defaultBeanId, suggestedGrind, editingShot, saving, onSubmit, onCancel, targetTime = [26, 30], higherIsFiner = true }) {
+export default function ShotForm({ beans, defaultBeanId, suggestedGrind, editingShot, saving, onSubmit, onCancel, targetTime = [26, 30], higherIsFiner = true, extract = DEFAULT_EXTRACT }) {
   const [form, setForm] = useState(() =>
     editingShot
       ? { ...editingShot, grind: String(editingShot.grind), dose: String(editingShot.dose), time: String(editingShot.time), yield: String(editingShot.yield) }
-      : blank(defaultBeanId, suggestedGrind),
+      : blank(defaultBeanId, suggestedGrind, extract),
   )
   const [error, setError] = useState('')
   const [saved, setSaved] = useState('')
@@ -40,7 +42,7 @@ export default function ShotForm({ beans, defaultBeanId, suggestedGrind, editing
       const j = judgeTime(nums.time, targetTime, higherIsFiner)
       const step = j.status === 'fast' ? 0.1 : j.status === 'slow' ? -0.1 : 0
       const next = Math.round((nums.grind + (higherIsFiner === false ? -step : step)) * 10) / 10
-      setForm(blank(form.beanId, String(next)))
+      setForm(blank(form.beanId, String(next), extract))
       setSaved(j.status === 'ok' ? `기록했어요. ${nums.time}초 적정, 지금 세팅 유지` : `기록했어요. ${nums.time}초 ${j.label} → 다음 샷은 ${next.toFixed(1)}(${j.status === 'fast' ? '가늘게' : '굵게'})로 넣어 뒀어요`)
     }
   }
@@ -70,8 +72,12 @@ export default function ShotForm({ beans, defaultBeanId, suggestedGrind, editing
       </div>
       <div className="row">
         <label>추출 시간 (초)<input className="input" name="time" inputMode="decimal" value={form.time} onChange={handleChange} /></label>
-        <label>추출량 (g)<input className="input" name="yield" inputMode="decimal" value={form.yield} onChange={handleChange} /></label>
+        <label>추출량 ({extract.unit})<input className="input" name="yield" inputMode="decimal" value={form.yield} onChange={handleChange} /></label>
       </div>
+      <p className="muted small">
+        비율 {ratioText(form.dose, form.yield)} · 목표 {extract.dose}g → {extract.yield}{extract.unit} ({ratioText(extract.dose, extract.yield)})
+        {Number(form.yield) > 0 && Number(form.yield) !== extract.yield && ` · 목표보다 ${Number(form.yield) > extract.yield ? '많이' : '적게'} 뽑음`}
+      </p>
       <label>
         메모
         <input className="input" name="memo" value={form.memo} onChange={handleChange} placeholder="예: 신맛 강함, 오픈 첫 세팅" />

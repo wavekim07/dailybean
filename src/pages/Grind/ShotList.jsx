@@ -1,7 +1,7 @@
-import { judgeTime } from '../../utils/grindCalc.js'
+import { judgeTime, ratioText } from '../../utils/grindCalc.js'
 import { weatherText } from '../../utils/weatherApi.js'
 
-export default function ShotList({ shots, beanName, targetTime, higherIsFiner, onEdit, onDelete }) {
+export default function ShotList({ shots, beanName, targetTime, higherIsFiner, unit = 'g', onEdit, onDelete }) {
   if (shots.length === 0) return <div className="card placeholder">조건에 맞는 샷 기록이 없어요.</div>
 
   return (
@@ -17,7 +17,7 @@ export default function ShotList({ shots, beanName, targetTime, higherIsFiner, o
               </div>
               <div className="shot-nums">
                 <span>분쇄도 <b>{Number(s.grind).toFixed(1)}</b></span>
-                <span>{s.dose}g → {s.yield}g</span>
+                <span>{s.dose}g → {s.yield}{unit} ({ratioText(s.dose, s.yield)})</span>
                 <span>{s.time}초 <span className={`tag ${j.status}`}>{j.label}</span></span>
               </div>
               <div className="muted small">

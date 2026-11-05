@@ -9,7 +9,7 @@ import { hasStockRecord, lowStockItems, orderQtyOf } from '../../utils/stockCalc
 import { groupSales, summarize, total } from '../../utils/salesStats.js'
 import { toDateStr } from '../../utils/date.js'
 import { won } from '../../utils/format.js'
-import { judgeTime, signed } from '../../utils/grindCalc.js'
+import { extractOf, judgeTime, ratioText, signed } from '../../utils/grindCalc.js'
 import { weatherText } from '../../utils/weatherApi.js'
 import { photoSrc } from '../../utils/photos.js'
 
@@ -25,6 +25,7 @@ export default function Dashboard() {
   const activeBeanId = beanId ?? beans[0]?.id ?? null
   const rec = useGrindRecommendation(activeBeanId)
   const higherIsFiner = settings.grind.higherIsFiner !== false
+  const extract = extractOf(settings.grind)
 
   const [now] = useState(() => new Date())
   const today = toDateStr()
@@ -105,7 +106,8 @@ export default function Dashboard() {
               <strong className="grind-number">{rec.loading && !rec.weather ? '…' : rec.value.toFixed(1)}</strong>
               <span className="grind-meta">
                 {settings.store.grinder || '그라인더'}<br />
-                기준 {settings.grind.base.toFixed(1)} · 높을수록 {higherIsFiner ? '가늘게' : '굵게'}
+                기준 {settings.grind.base.toFixed(1)} · 높을수록 {higherIsFiner ? '가늘게' : '굵게'}<br />
+                목표 {extract.dose}g → {extract.yield}{extract.unit} ({ratioText(extract.dose, extract.yield)})
               </span>
             </div>
             {rec.parts.length > 0 && (

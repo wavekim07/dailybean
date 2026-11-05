@@ -1,3 +1,4 @@
+import { extractOf } from '../../utils/grindCalc.js'
 import { useMemo, useState } from 'react'
 import PageHeader from '../../components/common/PageHeader.jsx'
 import ConfirmDialog from '../../components/common/ConfirmDialog.jsx'
@@ -74,7 +75,7 @@ export default function GrindPage() {
       <PageHeader photo title="분쇄도" description="오늘 날씨와 원두 숙성도로 분쇄도를 추천하고 샷을 기록해요." />
       <div className="two-col">
         <div className="stack">
-          <GrindRecommendCard rec={rec} beans={beans} beanId={activeBeanId} onBeanChange={setBeanId} base={settings.grind.base} higherIsFiner={settings.grind.higherIsFiner !== false} grinder={settings.store.grinder} />
+          <GrindRecommendCard rec={rec} beans={beans} beanId={activeBeanId} onBeanChange={setBeanId} base={settings.grind.base} higherIsFiner={settings.grind.higherIsFiner !== false} grinder={settings.store.grinder} extract={extractOf(settings.grind)} targetTime={settings.grind.targetTime} />
           <ShotForm
             key={editingShot?.id ?? `new-${activeBeanId}-${rec.weather ? 'w' : 'n'}`}
             beans={beans}
@@ -86,6 +87,7 @@ export default function GrindPage() {
             onCancel={() => setEditingShot(null)}
             targetTime={settings.grind.targetTime}
             higherIsFiner={settings.grind.higherIsFiner !== false}
+            extract={extractOf(settings.grind)}
           />
           {notice && <p className="muted">{notice}</p>}
         </div>
@@ -118,9 +120,9 @@ export default function GrindPage() {
               </label>
             </div>
           </div>}
-          <ShotAverages shots={shots} beanName={beanName} grinder={settings.store.grinder} />
+          <ShotAverages shots={shots} beanName={beanName} grinder={settings.store.grinder} extract={extractOf(settings.grind)} targetTime={settings.grind.targetTime} />
           <p className="muted count">{filtered.length}개 / 전체 {shots.length}개</p>
-          <ShotList shots={filtered} beanName={beanName} targetTime={settings.grind.targetTime} higherIsFiner={settings.grind.higherIsFiner} onEdit={setEditingShot} onDelete={setDeleteTarget} />
+          <ShotList shots={filtered} beanName={beanName} targetTime={settings.grind.targetTime} higherIsFiner={settings.grind.higherIsFiner} unit={extractOf(settings.grind).unit} onEdit={setEditingShot} onDelete={setDeleteTarget} />
         </div>
       </div>
       <ConfirmDialog

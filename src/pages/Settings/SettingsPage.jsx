@@ -7,6 +7,7 @@ import PhotoPicker from '../../components/photo/PhotoPicker.jsx'
 import { Link } from 'react-router-dom'
 import { toDateStr } from '../../utils/date.js'
 import { validateBackup } from '../../utils/backup.js'
+import { extractOf, ratioText } from '../../utils/grindCalc.js'
 
 const GRIND_FIELDS = [
   { key: 'base', label: '기준 분쇄도', step: 0.1 },
@@ -79,6 +80,37 @@ function GrindSetting({ grind, onSave }) {
         <label>목표 추출 (초) 최대<input className="input" type="number" value={form.t1} onChange={(e) => setForm((p) => ({ ...p, t1: e.target.value }))} /></label>
       </div>
       {msg && <p className="muted">{msg}</p>}
+      <div className="actions"><button className="btn primary" type="submit">저장</button></div>
+    </form>
+  )
+}
+
+// 추출 기준: 목표 도징량·추출량과 추출량 단위. 샷 기록 칸에 미리 채워지고, 추천 카드에 비율이 보임
+function ExtractSetting({ grind, onSave }) {
+  const ex = extractOf(grind)
+  const [form, setForm] = useState({ dose: String(ex.dose), out: String(ex.yield), unit: ex.unit })
+  const [msg, setMsg] = useState('')
+  const set = (k) => (e) => { setForm((p) => ({ ...p, [k]: e.target.value })); setMsg('') }
+  const submit = (e) => {
+    e.preventDefault()
+    const dose = Number(form.dose)
+    const out = Number(form.out)
+    if (!(dose > 0) || !(out > 0)) return setMsg('도징량과 추출량을 0보다 큰 숫자로 넣어 주세요.')
+    onSave({ targetDose: dose, targetYield: out, yieldUnit: form.unit })
+  }
+  return (
+    <form className="card form" onSubmit={submit}>
+      <h2>추출 기준</h2>
+      <p className="muted">샷을 기록할 때 이 값이 미리 채워지고, 추천 카드에 목표 비율이 보여요. 분쇄도는 같은 양을 뽑는다는 전제에서 맞추기 때문에 기준이 있어야 해요.</p>
+      <div className="row">
+        <label>목표 도징량 (g)<input className="input" inputMode="decimal" value={form.dose} onChange={set('dose')} /></label>
+        <label>목표 추출량 ({form.unit})<input className="input" inputMode="decimal" value={form.out} onChange={set('out')} /></label>
+      </div>
+      <div className="radio-row">
+        <label><input type="radio" name="yieldUnit" checked={form.unit === 'g'} onChange={() => setForm((p) => ({ ...p, unit: 'g' }))} /> g (저울로 무게를 잼)</label>
+        <label><input type="radio" name="yieldUnit" checked={form.unit === 'ml'} onChange={() => setForm((p) => ({ ...p, unit: 'ml' }))} /> ml (샷잔 눈금으로 봄)</label>
+      </div>
+      <p className="muted">{msg || `비율 ${ratioText(form.dose, form.out)} · 1:1에 가까울수록 진하고, 1:3에 가까울수록 순해요.${form.unit === 'ml' ? ' 비율은 원래 무게(g)로 재는 값이라, ml로 보면 대략적인 값이에요.' : ''}`}</p>
       <div className="actions"><button className="btn primary" type="submit">저장</button></div>
     </form>
   )
@@ -200,6 +232,7 @@ export default function SettingsPage() {
         <RewardSetting key={settings.rewardThreshold} value={settings.rewardThreshold} onSave={(rewardThreshold) => save({ rewardThreshold }, '쿠폰 기준을 저장했어요.')} />
         <StockSetting key={settings.shortageRate} value={settings.shortageRate} onSave={(shortageRate) => save({ shortageRate }, '재고 부족 경고 기준을 저장했어요.')} />
         <GrindSetting key={JSON.stringify(settings.grind)} grind={settings.grind} onSave={(grind) => save({ grind }, '분쇄도 기준값을 저장했어요. 추천값에 바로 반영돼요.')} />
+        <ExtractSetting key={`ex-${settings.grind.targetDose}-${settings.grind.targetYield}-${settings.grind.yieldUnit}`} grind={settings.grind} onSave={(grind) => save({ grind }, '추출 기준을 저장했어요. 다음 샷 기록부터 이 값이 채워져요.')} />
         <BackupPanel state={state} dispatch={dispatch} />
       </div>
     </section>

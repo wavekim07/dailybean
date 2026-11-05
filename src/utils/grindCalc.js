@@ -84,3 +84,14 @@ export function findAdjustPoint(hourly, g, baseValue, opts, now = new Date()) {
 
 // 근거 표시용: 다이얼 숫자 변화량
 export const signed = (n) => `${n > 0 ? '+' : n < 0 ? '−' : '±'}${Math.abs(n).toFixed(2)}`
+
+// 추출 기준 (예전 저장 데이터에 없으면 기본값)
+export const extractOf = (grind) => ({
+  dose: Number(grind.targetDose ?? 19),
+  yield: Number(grind.targetYield ?? 32),
+  unit: grind.yieldUnit === 'ml' ? 'ml' : 'g',
+})
+
+// 추출 비율: 도징 1 대비 추출량. 19g → 32 = 1:1.7
+// 비율이 짧을수록(1:1 쪽) 진하고 농축된 맛, 길수록(1:3 쪽) 순한 맛 [Clive Coffee, Dialing In Espresso By Taste]
+export const ratioText = (dose, out) => (Number(dose) > 0 && Number(out) > 0 ? `1:${(Number(out) / Number(dose)).toFixed(1)}` : '-')
