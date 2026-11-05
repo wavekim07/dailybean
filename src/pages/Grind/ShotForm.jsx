@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { judgeTime, ratioText } from '../../utils/grindCalc.js'
 import { FLAVOR_WHEEL_URL, TASTE_AXES, hasTaste, tasteAdvice } from '../../utils/taste.js'
+import TasteMap from '../../components/grind/TasteMap.jsx'
 
 const nowLocal = () => {
   const d = new Date()
@@ -20,6 +21,8 @@ export default function ShotForm({ beans, defaultBeanId, suggestedGrind, editing
       : blank(defaultBeanId, suggestedGrind, extract),
   )
   const [error, setError] = useState('')
+  // 지금 고른 맛으로 저장하면 어떤 제안이 나오는지 미리 보여 줌
+  const advicePreview = tasteAdvice(form.taste, targetBodyOf(form.beanId), yieldStep)
   const [saved, setSaved] = useState('')
 
   const handleChange = (e) => {
@@ -58,7 +61,7 @@ export default function ShotForm({ beans, defaultBeanId, suggestedGrind, editing
   if (beans.length === 0) return <div className="card placeholder">재고 페이지의 "품목·현재 재고" 탭에서 분류가 "원두"인 품목을 먼저 등록해 주세요.</div>
 
   return (
-    <form className="card form" onSubmit={handleSubmit}>
+    <form className="card form shot-form" onSubmit={handleSubmit}>
       <h2>{editingShot ? '샷 기록 수정' : '샷 기록'}</h2>
       {saved && <p className="notice">✓ {saved}</p>}
       <div className="row">
@@ -86,7 +89,8 @@ export default function ShotForm({ beans, defaultBeanId, suggestedGrind, editing
         비율 {ratioText(form.dose, form.yield)} · 목표 {extract.dose}g → {extract.yield}{extract.unit} ({ratioText(extract.dose, extract.yield)})
         {Number(form.yield) > 0 && Number(form.yield) !== extract.yield && ` · 목표보다 ${Number(form.yield) > extract.yield ? '많이' : '적게'} 뽑음`}
       </p>
-      <div className="taste">
+      <div className="taste-wrap">
+        <div className="taste">
         <span className="taste-title">맛 평가 (선택) <span className="muted small">마셔 보고 눌러 주세요. 다음 샷 값을 맛 기준으로 제안해요.</span></span>
         {TASTE_AXES.map((a) => (
           <div key={a.key} className="taste-row" role="group" aria-label={a.label}>
@@ -99,6 +103,9 @@ export default function ShotForm({ beans, defaultBeanId, suggestedGrind, editing
             })}
           </div>
         ))}
+          {advicePreview && <p className="small taste-preview">→ {advicePreview.reason}</p>}
+        </div>
+        <TasteMap taste={form.taste} onPick={(t) => setForm((p) => ({ ...p, taste: t }))} />
       </div>
       <label>
         향·메모

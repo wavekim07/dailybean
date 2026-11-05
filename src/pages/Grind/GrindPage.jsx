@@ -79,8 +79,8 @@ export default function GrindPage() {
   return (
     <section>
       <PageHeader photo title="분쇄도" description="오늘 날씨와 원두 숙성도로 분쇄도를 추천하고 샷을 기록해요." />
-      <div className="two-col">
-        <div className="stack">
+      {/* PC: 왼쪽 추천 카드, 오른쪽 넓게 샷 기록(맛 지도가 평가 옆에 들어감). 아래에 평균과 기록 목록 */}
+      <div className="grind-layout">
           <GrindRecommendCard rec={rec} beans={beans} beanId={activeBeanId} onBeanChange={setBeanId} base={settings.grind.base} higherIsFiner={settings.grind.higherIsFiner !== false} grinder={settings.store.grinder} extract={extractOf(settings.grind)} targetTime={settings.grind.targetTime}
             targetBody={bodyTargetOf(items.find((i) => i.id === activeBeanId))} lastTasted={lastTasted} yieldStep={Number(settings.grind.yieldStep ?? 2)} />
           <Guard perm="shots">
@@ -100,9 +100,9 @@ export default function GrindPage() {
             yieldStep={Number(settings.grind.yieldStep ?? 2)}
           />
           </Guard>
-          {notice && <p className="muted">{notice}</p>}
-        </div>
-        <div>
+      </div>
+      {notice && <p className="muted">{notice}</p>}
+        <div className="grind-records">
           <div className="list-head">
             <h2>샷 기록</h2>
             <button className="btn" onClick={() => setShowFilter((v) => !v)}>{showFilter ? '검색 닫기' : '검색'}</button>
@@ -135,7 +135,6 @@ export default function GrindPage() {
           <p className="muted count">{filtered.length}개 / 전체 {shots.length}개</p>
           <ShotList shots={filtered} beanName={beanName} targetTime={settings.grind.targetTime} higherIsFiner={settings.grind.higherIsFiner} unit={extractOf(settings.grind).unit} onEdit={can('shots') ? setEditingShot : undefined} onDelete={can('shots') ? setDeleteTarget : undefined} />
         </div>
-      </div>
       <ConfirmDialog
         open={!!deleteTarget}
         message="이 샷 기록을 삭제할까요?"

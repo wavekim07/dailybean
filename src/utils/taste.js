@@ -41,3 +41,15 @@ export function tasteAdvice(taste, targetBody = 0, yieldStep = 2) {
   if (strength < targetBody) return { grindStep: 0, yieldDelta: -yieldStep, reason: `맛 균형은 좋은데 목표보다 연해요 → 추출량 −${yieldStep}` }
   return { grindStep: 0, yieldDelta: 0, reason: '목표한 맛에 가까워요 → 지금 세팅 유지' }
 }
+
+// 맛 평가 → 가로 위치 (-1 신맛 쪽, 0 균형, 1 쓴맛 쪽). 신맛·쓴맛이 둘 다 강하면 지도에 한 점으로 못 나타냄
+export function extractionOf(taste) {
+  const sour = taste?.sour
+  const bitter = taste?.bitter
+  if (sour == null && bitter == null) return null
+  if (sour === 1 && bitter === 1) return null
+  if (sour === 1) return -1
+  if (bitter === 1) return 1
+  return 0
+}
+

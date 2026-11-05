@@ -10,7 +10,8 @@ export function SalesBarChart({ rows }) {
       <ResponsiveContainer width="100%" height={260}>
         <BarChart data={rows} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#eee4d8" />
-          <XAxis dataKey="label" tick={{ fontSize: 11 }} interval="preserveStartEnd" />
+          {/* 날짜를 모두 보이게: 칸이 많으면 기울여서 겹치지 않게 */}
+          <XAxis dataKey="label" tick={{ fontSize: 11 }} interval={0} angle={rows.length > 7 ? -45 : 0} textAnchor={rows.length > 7 ? 'end' : 'middle'} height={rows.length > 7 ? 48 : 28} />
           <YAxis tickFormatter={manwon} tick={{ fontSize: 11 }} width={44} />
           <Tooltip formatter={(v) => won(v)} />
           <Legend />
