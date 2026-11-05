@@ -395,3 +395,25 @@ a.staff-chip { padding: 6px 12px; }
 .staff-pill.active { background: var(--primary); color: #fff; border-color: var(--primary); }
 .perm-list { list-style: none; padding: 0; margin: 4px 0 0; display: flex; flex-direction: column; gap: 8px; }
 .form .perm-list label, .form label.inline { flex-direction: row; align-items: center; gap: 8px; font-size: 14px; color: var(--text); flex: none; cursor: pointer; }
+
+/* 매출 달력 */
+.cal-nav { display: flex; gap: 6px; }
+.cal-nav .btn { padding: 4px 12px; }
+.cal { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; margin: 10px 0 6px; }
+.cal-head { text-align: center; font-size: 12px; color: var(--muted); padding: 2px 0; }
+.cal-cell { font: inherit; color: var(--text); border: none; border-radius: 8px; background: #f6f1ea; min-height: 54px; padding: 4px; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; position: relative; text-align: left; min-width: 0; }
+button.cal-cell { cursor: pointer; }
+.cal-cell.empty { background: transparent; }
+.cal-cell.today { outline: 2px solid var(--primary); }
+.cal-day { font-size: 12px; font-weight: 600; }
+.sun { color: #c0392b; }
+.sat { color: #2e6da4; }
+.cal-amt { font-size: 12px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.cal-dot { position: absolute; top: 6px; right: 6px; width: 6px; height: 6px; border-radius: 50%; background: var(--primary); }
+.cal-cell.lv1 { background: #f1e4d3; }
+.cal-cell.lv2 { background: #e6cfb2; }
+.cal-cell.lv3 { background: #d4b08a; }
+.cal-cell.lv4 { background: #b98a5e; color: #fff; }
+.cal-cell.lv4 .sun, .cal-cell.lv4 .sat { color: #fff; }
+.cal-cell.lv4 .cal-dot { background: #fff; }
+@media (min-width: 768px) { .cal-cell { min-height: 64px; padding: 6px; } .cal-amt { font-size: 13px; } }
