@@ -1,5 +1,6 @@
 import { initialState } from './initialState.js'
 import { toDateStr } from '../utils/date.js'
+import { defaultPerms } from '../constants/permissions.js'
 
 export const newId = () =>
   typeof crypto !== 'undefined' && crypto.randomUUID
@@ -81,12 +82,19 @@ export function rootReducer(state, action) {
 
     // 근무자
     case 'ADD_STAFF':
-      return { ...state, staff: add(state.staff, { name: payload }) }
+      return { ...state, staff: add(state.staff, { name: payload, perms: defaultPerms() }) }
     case 'DELETE_STAFF':
       return {
         ...state, staff: remove(state.staff, payload),
         settings: state.settings.currentStaffId === payload ? { ...state.settings, currentStaffId: null } : state.settings,
       }
+    case 'SET_STAFF_PERM': {
+      // payload: { id, key, value } 관리자가 직원 한 명의 권한 하나를 켜고 끔
+      const { id, key, value } = payload
+      return { ...state, staff: state.staff.map((s) => (s.id === id ? { ...s, perms: { ...defaultPerms(), ...s.perms, [key]: value } } : s)) }
+    }
+    case 'SET_ADMIN':
+      return { ...state, auth: { ...state.auth, admin: payload } }
     case 'SET_CURRENT_STAFF':
       return { ...state, settings: { ...state.settings, currentStaffId: payload } }
 
@@ -184,6 +192,7 @@ export function rootReducer(state, action) {
       const s = payload.settings || {}
       return {
         ...initialState, ...payload,
+        auth: payload.auth?.admin ? payload.auth : state.auth, // 관리자 정보가 없는 백업이면 지금 관리자를 유지
         settings: {
           ...initialState.settings, ...s,
           store: { ...initialState.settings.store, ...s.store },

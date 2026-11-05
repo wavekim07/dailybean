@@ -7,12 +7,15 @@ import { useApp } from '../../context/AppContext.jsx'
 import useGrindRecommendation from '../../hooks/useGrindRecommendation.js'
 import { calcGrind, judgeTime, latestRoastDate } from '../../utils/grindCalc.js'
 import { fetchWeatherAt } from '../../utils/weatherApi.js'
+import Guard from '../../components/auth/Guard.jsx'
+import { usePermission } from '../../context/AdminContext.jsx'
 import ShotForm from './ShotForm.jsx'
 import ShotList from './ShotList.jsx'
 import ShotAverages from './ShotAverages.jsx'
 
 export default function GrindPage() {
   const { state, dispatch } = useApp()
+  const { can } = usePermission()
   const { items, shots, stockIns, settings } = state
   const beans = items.filter((i) => i.category === '원두')
 
@@ -76,6 +79,7 @@ export default function GrindPage() {
       <div className="two-col">
         <div className="stack">
           <GrindRecommendCard rec={rec} beans={beans} beanId={activeBeanId} onBeanChange={setBeanId} base={settings.grind.base} higherIsFiner={settings.grind.higherIsFiner !== false} grinder={settings.store.grinder} extract={extractOf(settings.grind)} targetTime={settings.grind.targetTime} />
+          <Guard perm="shots">
           <ShotForm
             key={editingShot?.id ?? `new-${activeBeanId}-${rec.weather ? 'w' : 'n'}`}
             beans={beans}
@@ -89,6 +93,7 @@ export default function GrindPage() {
             higherIsFiner={settings.grind.higherIsFiner !== false}
             extract={extractOf(settings.grind)}
           />
+          </Guard>
           {notice && <p className="muted">{notice}</p>}
         </div>
         <div>
@@ -122,7 +127,7 @@ export default function GrindPage() {
           </div>}
           <ShotAverages shots={shots} beanName={beanName} grinder={settings.store.grinder} extract={extractOf(settings.grind)} targetTime={settings.grind.targetTime} />
           <p className="muted count">{filtered.length}개 / 전체 {shots.length}개</p>
-          <ShotList shots={filtered} beanName={beanName} targetTime={settings.grind.targetTime} higherIsFiner={settings.grind.higherIsFiner} unit={extractOf(settings.grind).unit} onEdit={setEditingShot} onDelete={setDeleteTarget} />
+          <ShotList shots={filtered} beanName={beanName} targetTime={settings.grind.targetTime} higherIsFiner={settings.grind.higherIsFiner} unit={extractOf(settings.grind).unit} onEdit={can('shots') ? setEditingShot : undefined} onDelete={can('shots') ? setDeleteTarget : undefined} />
         </div>
       </div>
       <ConfirmDialog

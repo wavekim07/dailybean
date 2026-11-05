@@ -12,12 +12,14 @@ import { won } from '../../utils/format.js'
 import { extractOf, judgeTime, ratioText, signed } from '../../utils/grindCalc.js'
 import { weatherText } from '../../utils/weatherApi.js'
 import { photoSrc } from '../../utils/photos.js'
+import { usePermission } from '../../context/AdminContext.jsx'
 
 const greeting = (h) => (h < 11 ? '좋은 아침이에요' : h < 17 ? '좋은 오후예요' : '오늘도 수고했어요')
 const DAYS = ['일', '월', '화', '수', '목', '금', '토']
 
 export default function Dashboard() {
   const { state } = useApp()
+  const { can } = usePermission()
   const { settings, items, stockIns, counts, shots, sales } = state
   const beans = items.filter((i) => i.category === '원두')
   const [beanId, setBeanId] = useState(null)
@@ -127,7 +129,7 @@ export default function Dashboard() {
           <div className="panel-title"><h2>매출</h2><Link className="link" to="/sales">자세히</Link></div>
           <div className="sales-sum">
             <div><span className="muted">오늘</span><strong>{todaySale ? won(total(todaySale)) : '입력 전'}</strong></div>
-            <div><span className="muted">이번 주</span><strong>{won(week.total)}</strong></div>
+            <div><span className="muted">이번 주</span><strong>{can('salesView') ? won(week.total) : '🔒'}</strong></div>
           </div>
           {todaySale?.memo && <p className="muted" style={{ marginTop: 8 }}>메모: {todaySale.memo}</p>}
         </div>

@@ -7,9 +7,13 @@ import StockInForm from './StockInForm.jsx'
 import DailyCountForm from './DailyCountForm.jsx'
 import UsageTable from './UsageTable.jsx'
 import ItemsPanel from './ItemsPanel.jsx'
+import Guard from '../../components/auth/Guard.jsx'
+import { usePermission } from '../../context/AdminContext.jsx'
+
 
 export default function StockPage({ embedded = false }) {
   const { state, dispatch } = useApp()
+  const { can } = usePermission()
   const { items, stockIns, counts, settings } = state
   const [date, setDate] = useState(toDateStr())
   const [tab, setTab] = useState('items')
@@ -33,6 +37,7 @@ export default function StockPage({ embedded = false }) {
           <input className="input" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
         </label>
       </div>
+      <Guard perm="stock">
       <div className="two-col">
         <div className="stack">
           <StockInForm items={items} onSubmit={(data) => dispatch({ type: 'ADD_STOCK_IN', payload: data })} />
@@ -46,7 +51,7 @@ export default function StockPage({ embedded = false }) {
                       {nameOf(s.itemId)} +{s.qty}
                       {s.roastDate && <span className="muted"> · 로스팅 {s.roastDate}</span>}
                     </span>
-                    <button className="btn danger" onClick={() => dispatch({ type: 'DELETE_STOCK_IN', payload: s.id })}>삭제</button>
+                    {can('stock') && <button className="btn danger" onClick={() => dispatch({ type: 'DELETE_STOCK_IN', payload: s.id })}>삭제</button>}
                   </li>
                 ))}
               </ul>
@@ -64,6 +69,7 @@ export default function StockPage({ embedded = false }) {
           <UsageTable rows={rows} />
         </div>
       </div>
+      </Guard>
       </>
       )}
     </section>

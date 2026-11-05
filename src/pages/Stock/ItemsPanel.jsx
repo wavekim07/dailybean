@@ -3,6 +3,8 @@ import SearchBar from '../../components/common/SearchBar.jsx'
 import ConfirmDialog from '../../components/common/ConfirmDialog.jsx'
 import { useApp } from '../../context/AppContext.jsx'
 import { CATEGORIES } from '../../constants/categories.js'
+import Guard from '../../components/auth/Guard.jsx'
+import { usePermission } from '../../context/AdminContext.jsx'
 import ItemForm from './ItemForm.jsx'
 import ItemList from './ItemList.jsx'
 import { currentStock, hasStockRecord, orderQtyOf } from '../../utils/stockCalc.js'
@@ -13,6 +15,7 @@ import { activeOrderOf } from '../../utils/orders.js'
 // 재고 페이지의 "품목·현재 재고" 탭: 품목 등록·수정·삭제·검색 + 현재 추정 재고
 export default function ItemsPanel() {
   const { state, dispatch } = useApp()
+  const { can } = usePermission()
   const { items, stockIns, counts, settings, orders = [] } = state
 
   const [keyword, setKeyword] = useState('')
@@ -54,6 +57,7 @@ export default function ItemsPanel() {
   return (
     <>
       <div className="two-col">
+        <Guard perm="items">
         <ItemForm
           key={editingItem?.id ?? 'new'}
           editingItem={editingItem}
@@ -61,6 +65,7 @@ export default function ItemsPanel() {
           onSubmit={handleSubmit}
           onCancel={() => setEditingItem(null)}
         />
+        </Guard>
         <div>
           <div className="toolbar">
             <SearchBar value={keyword} onChange={setKeyword} placeholder="품목명 검색" />
@@ -69,8 +74,8 @@ export default function ItemsPanel() {
             </select>
           </div>
           <p className="muted count">{filtered.length}개 / 전체 {items.length}개</p>
-          <ItemList items={filtered} stockOf={(item) => currentStock(item, stockIns, counts)} known={(item) => hasStockRecord(item, stockIns, counts)} onCount={saveCount} shortageRate={settings.shortageRate} onEdit={setEditingItem} onDelete={setDeleteTarget}
-            inOrder={(item) => !!activeOrderOf(orders, item.id)} onOrder={(item) => dispatch({ type: 'ADD_ORDER', payload: { itemId: item.id, qty: orderQtyOf(item) } })} />
+          <ItemList items={filtered} stockOf={(item) => currentStock(item, stockIns, counts)} known={(item) => hasStockRecord(item, stockIns, counts)} onCount={can('stock') ? saveCount : undefined} shortageRate={settings.shortageRate} onEdit={can('items') ? setEditingItem : undefined} onDelete={can('items') ? setDeleteTarget : undefined}
+            inOrder={(item) => !!activeOrderOf(orders, item.id)} onOrder={can('orders') ? (item) => dispatch({ type: 'ADD_ORDER', payload: { itemId: item.id, qty: orderQtyOf(item) } }) : undefined} />
         </div>
       </div>
       <ConfirmDialog

@@ -28,8 +28,8 @@ export default function ShotList({ shots, beanName, targetTime, higherIsFiner, u
               </div>
             </div>
             <div className="actions">
-              <button className="btn" onClick={() => onEdit(s)}>수정</button>
-              <button className="btn danger" onClick={() => onDelete(s)}>삭제</button>
+              {onEdit && <button className="btn" onClick={() => onEdit(s)}>수정</button>}
+              {onDelete && <button className="btn danger" onClick={() => onDelete(s)}>삭제</button>}
             </div>
           </li>
         )

@@ -8,6 +8,8 @@ import { Link } from 'react-router-dom'
 import { toDateStr } from '../../utils/date.js'
 import { validateBackup } from '../../utils/backup.js'
 import { extractOf, ratioText } from '../../utils/grindCalc.js'
+import { PERMISSIONS, defaultPerms } from '../../constants/permissions.js'
+import { useAdmin } from '../../context/AdminContext.jsx'
 
 const GRIND_FIELDS = [
   { key: 'base', label: '기준 분쇄도', step: 0.1 },
@@ -21,9 +23,14 @@ const GRIND_FIELDS = [
   { key: 'restAdj', label: '숙성 중 보정', step: 0.05 },
 ]
 
+// 근무자 목록 + 직원별 권한: 이름을 고르면 그 사람의 권한을 켜고 끌 수 있어요 (관리자 화면)
 function StaffSetting({ staff, dispatch }) {
   const [name, setName] = useState('')
   const [msg, setMsg] = useState('')
+  const [selectedId, setSelectedId] = useState(null)
+  const [deleteTarget, setDeleteTarget] = useState(null)
+  const selected = staff.find((s) => s.id === selectedId) || null
+  const perms = selected ? { ...defaultPerms(), ...selected.perms } : null
   const submit = (e) => {
     e.preventDefault()
     const n = name.trim()
@@ -34,18 +41,35 @@ function StaffSetting({ staff, dispatch }) {
   }
   return (
     <div className="card form">
-      <h2>근무자</h2>
-      <p className="muted">로그인 없이 이름만 등록해요. 화면 위에서 지금 근무자를 고르면 기록에 이름이 붙어요.</p>
+      <h2>근무자와 권한</h2>
+      <p className="muted">직원은 화면 위에서 자기 이름을 고르면 여기서 정한 권한만큼 쓸 수 있어요. 이름을 누르면 권한을 바꿀 수 있어요. 설정은 관리자만 들어와요.</p>
       <form className="row" onSubmit={submit}>
         <input className="input" value={name} onChange={(e) => { setName(e.target.value); setMsg('') }} placeholder="이름" />
         <button className="btn primary" type="submit">추가</button>
       </form>
       {msg && <p className="error">{msg}</p>}
-      <div className="staff-list">
-        {staff.map((s) => (
-          <span key={s.id} className="reason-chip">{s.name} <button className="link-btn danger-text" onClick={() => dispatch({ type: 'DELETE_STAFF', payload: s.id })} aria-label={`${s.name} 삭제`}>✕</button></span>
-        ))}
+      {staff.length === 0 && <p className="muted small">아직 등록한 직원이 없어요. 직원이 없으면 누구나 기본 권한으로 쓸 수 있어요.</p>}
+      <div className="staff-perm-list">
+        {staff.map((s) => {
+          const p = { ...defaultPerms(), ...s.perms }
+          const off = PERMISSIONS.filter((x) => !p[x.key]).length
+          return <button key={s.id} type="button" className={`staff-pill ${s.id === selectedId ? 'active' : ''}`} onClick={() => setSelectedId(s.id === selectedId ? null : s.id)}>{s.name}{off ? ` · 제한 ${off}` : ''}</button>
+        })}
       </div>
+      {selected && (
+        <div className="panel-note">
+          <strong>{selected.name}</strong>의 권한
+          <ul className="perm-list">
+            {PERMISSIONS.map((x) => (
+              <li key={x.key}><label><input type="checkbox" checked={!!perms[x.key]} onChange={(e) => dispatch({ type: 'SET_STAFF_PERM', payload: { id: selected.id, key: x.key, value: e.target.checked } })} /> {x.label}</label></li>
+            ))}
+          </ul>
+          <div className="actions"><button type="button" className="btn danger" onClick={() => setDeleteTarget(selected)}>{selected.name} 삭제</button></div>
+        </div>
+      )}
+      <ConfirmDialog open={!!deleteTarget} message={deleteTarget && `${deleteTarget.name}을(를) 근무자 목록에서 지울까요? 지금까지 남긴 기록은 그대로 남아요.`}
+        onConfirm={() => { dispatch({ type: 'DELETE_STAFF', payload: deleteTarget.id }); setSelectedId(null); setDeleteTarget(null) }}
+        onCancel={() => setDeleteTarget(null)} />
     </div>
   )
 }
@@ -206,6 +230,7 @@ function BackupPanel({ state, dispatch }) {
 export default function SettingsPage() {
   const { state, dispatch } = useApp()
   const { settings } = state
+  const { logout, minutesLeft } = useAdmin()
   const [notice, setNotice] = useState('')
   const save = (payload, text) => {
     dispatch({ type: 'UPDATE_SETTINGS', payload })
@@ -214,7 +239,11 @@ export default function SettingsPage() {
 
   return (
     <section>
-      <PageHeader title="설정" description="매장 정보, 배경 사진, 분쇄도 기준값, 쿠폰 기준을 정해요." />
+      <PageHeader title="설정" description="매장 정보, 근무자 권한, 분쇄도·추출 기준, 쿠폰 기준을 정해요." />
+      <div className="admin-bar">
+        <span>🔓 관리자 모드 · 손대지 않으면 {minutesLeft}분 뒤 자동으로 끝나요</span>
+        <button className="btn" onClick={logout}>관리자 모드 끝내기</button>
+      </div>
       {notice && <p className="notice">✓ {notice}</p>}
       <div className="card store-summary">
         <h2>우리 매장</h2>

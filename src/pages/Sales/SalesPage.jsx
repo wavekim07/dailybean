@@ -6,6 +6,8 @@ import { toDateStr } from '../../utils/date.js'
 import { won } from '../../utils/format.js'
 import { groupSales, salesByWeather, summarize, total } from '../../utils/salesStats.js'
 import { fetchWeatherAt, weatherText } from '../../utils/weatherApi.js'
+import Guard from '../../components/auth/Guard.jsx'
+import { usePermission } from '../../context/AdminContext.jsx'
 import SalesForm from './SalesForm.jsx'
 import { PaymentPieChart, SalesBarChart, SalesShareChart, WeatherSalesChart } from './SalesCharts.jsx'
 
@@ -17,6 +19,7 @@ const PERIODS = [
 
 export default function SalesPage() {
   const { state, dispatch } = useApp()
+  const { can } = usePermission()
   const { sales, settings } = state
 
   const [date, setDate] = useState(toDateStr())
@@ -53,7 +56,7 @@ export default function SalesPage() {
       <PageHeader photo title="매출" description="하루 카드·현금 매출을 입력하고 기간별로 확인해요." />
       <div className="two-col">
         <div className="stack">
-          <SalesForm key={date + (existing?.id ?? '')} date={date} existing={existing} saving={saving} onDateChange={setDate} onSubmit={handleSubmit} />
+          <Guard perm="salesInput"><SalesForm key={date + (existing?.id ?? '')} date={date} existing={existing} saving={saving} onDateChange={setDate} onSubmit={handleSubmit} /></Guard>
           <div className="card">
             <div className="grind-head">
               <h2>매출 목록</h2>
@@ -67,15 +70,16 @@ export default function SalesPage() {
                     <strong>{s.date.slice(5)}</strong> {won(total(s))}
                     <span className="muted small"> · 카드 {won(s.card)} · 현금 {won(s.cash)}{s.weather && ` · ${weatherText(s.weather.code)} ${s.weather.temp}℃`}</span>
                   </span>
-                  <span className="actions">
+                  {can('salesInput') && <span className="actions">
                     <button className="btn" onClick={() => setDate(s.date)}>수정</button>
                     <button className="btn danger" onClick={() => setDeleteTarget(s)}>삭제</button>
-                  </span>
+                  </span>}
                 </li>
               ))}
             </ul>
           </div>
         </div>
+        <Guard perm="salesView">
         <div className="stack">
           <div className="tabs">
             {PERIODS.map((p) => (
@@ -101,6 +105,7 @@ export default function SalesPage() {
             <div className="card"><h2>날씨별 하루 평균 (전체 기간)</h2><WeatherSalesChart rows={byWeather} /></div>
           </div>
         </div>
+        </Guard>
       </div>
       <ConfirmDialog
         open={!!deleteTarget}

@@ -48,9 +48,9 @@ export default function ItemList({ items, stockOf, known, onCount, shortageRate,
           </div>
           <div className="actions">
             {low && !inOrder?.(item) && onOrder && <button className="btn primary" onClick={() => onOrder(item)}>발주 담기</button>}
-            <button className={`btn ${hasRecord ? '' : 'primary'}`} onClick={() => { setCountingId(item.id); setQty('') }}>수량 입력</button>
-            <button className="btn" onClick={() => onEdit(item)}>수정</button>
-            <button className="btn danger" onClick={() => onDelete(item)}>삭제</button>
+            {onCount && <button className={`btn ${hasRecord ? '' : 'primary'}`} onClick={() => { setCountingId(item.id); setQty('') }}>수량 입력</button>}
+            {onEdit && <button className="btn" onClick={() => onEdit(item)}>수정</button>}
+            {onDelete && <button className="btn danger" onClick={() => onDelete(item)}>삭제</button>}
           </div>
         </li>
         )

@@ -4,6 +4,7 @@ import StockPage from '../Stock/StockPage.jsx'
 import Checklist from './Checklist.jsx'
 import Handoff from './Handoff.jsx'
 import OrderList from './OrderList.jsx'
+import Guard from '../../components/auth/Guard.jsx'
 
 const TABS = [
   { id: 'today', label: '오픈·마감' },
@@ -25,7 +26,7 @@ export default function OpsPage() {
       {tab === 'today' && <Checklist />}
       {tab === 'handoff' && <Handoff />}
       {tab === 'stock' && <StockPage embedded />}
-      {tab === 'order' && <OrderList />}
+      {tab === 'order' && <Guard perm="orders"><OrderList /></Guard>}
     </section>
   )
 }
