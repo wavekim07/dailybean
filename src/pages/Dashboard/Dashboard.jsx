@@ -35,7 +35,7 @@ export default function Dashboard() {
   const waiting = (state.orders || []).filter((o) => o.status !== 'received').length
   const unknown = items.filter((i) => !hasStockRecord(i, stockIns, counts))
   const todaySale = sales.find((s) => s.date === today)
-  const week = summarize(groupSales(sales, 'week').slice(-1))
+  const week = summarize(groupSales(sales, 'week7')) // 오늘 포함 최근 7일 (매출 화면의 주간과 같은 기준)
   const recent = [...shots].sort((a, b) => b.datetime.localeCompare(a.datetime)).slice(0, 4)
   const todayShots = shots.filter((s) => s.datetime.startsWith(today)).length
   const beanName = (id) => items.find((i) => i.id === id)?.name ?? '-'
@@ -129,7 +129,7 @@ export default function Dashboard() {
           <div className="panel-title"><h2>매출</h2><Link className="link" to="/sales">자세히</Link></div>
           <div className="sales-sum">
             <div><span className="muted">오늘</span><strong>{todaySale ? won(total(todaySale)) : '입력 전'}</strong></div>
-            <div><span className="muted">이번 주</span><strong>{can('salesView') ? won(week.total) : '🔒'}</strong></div>
+            <div><span className="muted">최근 7일</span><strong>{can('salesView') ? won(week.total) : '🔒'}</strong></div>
           </div>
           {todaySale?.memo && <p className="muted" style={{ marginTop: 8 }}>메모: {todaySale.memo}</p>}
         </div>

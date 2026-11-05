@@ -11,9 +11,13 @@ function weekStart(dateStr) {
   return toDateStr(d)
 }
 
-const keyOf = (date, period) => (period === 'day' ? date : period === 'week' ? weekStart(date) : date.slice(0, 7))
+// day: 하루씩 14일 / week7: 기준일 포함 최근 7일(기준일 −6일 ~ 기준일)을 하루씩 / week: 월요일 시작 주 / month: 달
+const daily = (period) => period === 'day' || period === 'week7'
+const keyOf = (date, period) => (daily(period) ? date : period === 'week' ? weekStart(date) : date.slice(0, 7))
+const WD = ['일', '월', '화', '수', '목', '금', '토']
 
 const labelOf = (key, period) => {
+  if (period === 'week7') return `${key.slice(5).replace('-', '/')}(${WD[new Date(`${key}T00:00:00`).getDay()]})`
   if (period === 'day') return key.slice(5).replace('-', '/')
   if (period === 'week') return `${key.slice(5).replace('-', '/')}주`
   return `${Number(key.slice(5))}월`
@@ -21,12 +25,12 @@ const labelOf = (key, period) => {
 
 // 기준일에서 거슬러 올라간 구간 목록 (매출이 없는 날도 0으로 표시)
 function buckets(period, endDate) {
-  const n = period === 'day' ? 14 : period === 'week' ? 8 : 6
+  const n = period === 'day' ? 14 : period === 'week7' ? 7 : period === 'week' ? 8 : 6
   const keys = []
   const d = new Date(`${endDate}T00:00:00`)
   for (let i = 0; i < n; i++) {
     keys.unshift(keyOf(toDateStr(d), period))
-    if (period === 'day') d.setDate(d.getDate() - 1)
+    if (daily(period)) d.setDate(d.getDate() - 1)
     else if (period === 'week') d.setDate(d.getDate() - 7)
     else d.setMonth(d.getMonth() - 1, 1)
   }

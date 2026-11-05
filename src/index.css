@@ -399,7 +399,13 @@ a.staff-chip { padding: 6px 12px; }
 /* 매출 달력 */
 .cal-nav { display: flex; gap: 6px; }
 .cal-nav .btn { padding: 4px 12px; }
-.cal { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; margin: 10px 0 6px; }
+.cal { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 3px; margin: 10px 0 6px; }
+.cal-title { font-size: 15px; margin: 0; }
+.cal-week { background: #ece4d8; }
+.cal-mark { font-style: normal; font-size: 10px; font-weight: 700; margin-left: 2px; }
+.cal-mark.hi { color: #c0392b; }
+.cal-mark.lo { color: #2e6da4; }
+.cal-cell.lv4 .cal-mark { color: #fff; }
 .cal-head { text-align: center; font-size: 12px; color: var(--muted); padding: 2px 0; }
 .cal-cell { font: inherit; color: var(--text); border: none; border-radius: 8px; background: #f6f1ea; min-height: 54px; padding: 4px; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; position: relative; text-align: left; min-width: 0; }
 button.cal-cell { cursor: pointer; }
@@ -435,3 +441,30 @@ button.cal-cell { cursor: pointer; }
 .taste-btn { flex: 1; font: inherit; font-size: 13px; padding: 8px 4px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); cursor: pointer; color: var(--text); }
 .taste-btn.on { background: var(--primary); border-color: var(--primary); color: #fff; font-weight: 700; }
 .ok-chip { background: #e3f4e6; color: #2d7a3e; }
+
+/* 매출 화면 배치: PC에서 두 칸 높이를 맞춤 */
+.eq-row { display: grid; grid-template-columns: 1fr; gap: 16px; margin-bottom: 16px; }
+.eq-row > * { min-width: 0; }
+.fit { display: flex; flex-direction: column; }
+.fit .scroll { max-height: 420px; overflow-y: auto; }
+.chart-card { display: flex; flex-direction: column; }
+.chart-card .chart { margin-top: auto; }
+.sales-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-bottom: 8px; }
+.stats { margin-bottom: 16px; }
+@media (min-width: 900px) {
+  .eq-row { grid-template-columns: 1fr 1fr; align-items: stretch; }
+  .eq-row > .card, .eq-row > form { height: 100%; }
+  /* 목록 길이가 줄 높이를 늘리지 않게: 옆 칸(입력) 높이에 맞추고 나머지는 스크롤 */
+  .fit .scroll { max-height: none; flex: 1; min-height: 240px; contain: size; }
+}
+.hourly-grid { grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); }
+.hourly-row span { flex: 0 0 104px; }
+@media (max-width: 480px) {
+  .cal { gap: 2px; }
+  .cal-cell { padding: 3px 2px; min-height: 50px; }
+  .cal-amt { font-size: 10px; letter-spacing: -0.03em; }
+  .cal-day { font-size: 11px; }
+  .cal-head { font-size: 10px; }
+}
+.cal-mark { display: block; margin-left: 0; font-size: 9px; line-height: 1.1; }
+.cal-dot { top: auto; bottom: 5px; right: 5px; }
