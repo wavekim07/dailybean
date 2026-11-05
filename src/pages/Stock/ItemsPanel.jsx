@@ -21,6 +21,9 @@ export default function ItemsPanel() {
   const [keyword, setKeyword] = useState('')
   const [category, setCategory] = useState('전체')
   const [editingItem, setEditingItem] = useState(null)
+  // 품목 등록은 가끔 하는 일이라 접어 두고, 매일 쓰는 목록(수량 입력)을 위로 올림
+  const [showForm, setShowForm] = useState(false)
+  const formOpen = showForm || !!editingItem || items.length === 0
   const [deleteTarget, setDeleteTarget] = useState(null)
 
   // 검색: 이름 부분 일치 + 분류 필터
@@ -56,18 +59,22 @@ export default function ItemsPanel() {
 
   return (
     <>
-      <div className="two-col">
+      <div className={formOpen ? 'two-col' : ''}>
+        {formOpen && (
         <Guard perm="items">
         <ItemForm
           key={editingItem?.id ?? 'new'}
           editingItem={editingItem}
           existingNames={items.map((i) => i.name)}
-          onSubmit={handleSubmit}
-          onCancel={() => setEditingItem(null)}
+          onSubmit={(d, q) => { handleSubmit(d, q); if (!editingItem) setShowForm(false) }}
+          onCancel={() => { setEditingItem(null); setShowForm(false) }}
+          closable={items.length > 0}
         />
         </Guard>
+        )}
         <div>
           <div className="toolbar">
+            {!formOpen && can('items') && <button className="btn primary" onClick={() => setShowForm(true)}>＋ 품목 등록</button>}
             <SearchBar value={keyword} onChange={setKeyword} placeholder="품목명 검색" />
             <select className="input" value={category} onChange={(e) => setCategory(e.target.value)}>
               {['전체', ...CATEGORIES].map((c) => <option key={c}>{c}</option>)}

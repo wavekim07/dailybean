@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { useApp } from '../../context/AppContext.jsx'
 import { toDateStr } from '../../utils/date.js'
 import { staffName } from '../../utils/staff.js'
+import { Link } from 'react-router-dom'
+import { useAdmin } from '../../context/AdminContext.jsx'
 
 const KINDS = [{ id: 'open', label: '오픈' }, { id: 'close', label: '마감' }]
 
@@ -9,6 +11,7 @@ const KINDS = [{ id: 'open', label: '오픈' }, { id: 'close', label: '마감' }
 export default function Checklist() {
   const { state, dispatch } = useApp()
   const { settings, checkLogs, staff } = state
+  const { isAdmin } = useAdmin() // 항목 추가·삭제는 관리자만 (체크는 누구나)
   const [kind, setKind] = useState(() => (new Date().getHours() < 15 ? 'open' : 'close'))
   const [date, setDate] = useState(toDateStr())
   const [text, setText] = useState('')
@@ -40,7 +43,7 @@ export default function Checklist() {
       {list.length > 0 && (
         <div className="progress check-progress"><div className="bar" style={{ width: `${(done / list.length) * 100}%` }} /></div>
       )}
-      {list.length === 0 && <p className="muted">아직 {kind === 'open' ? '오픈' : '마감'} 항목이 없어요. 우리 매장에서 매일 확인하는 일을 아래에 적어 주세요.</p>}
+      {list.length === 0 && <p className="muted">아직 {kind === 'open' ? '오픈' : '마감'} 항목이 없어요. {isAdmin ? '우리 매장에서 매일 확인하는 일을 아래에 적어 주세요.' : '관리자가 항목을 정하면 여기 나와요.'}</p>}
 
       <ul className="checklist">
         {list.map((item) => {
@@ -52,17 +55,23 @@ export default function Checklist() {
                 <span className="check-text">{item.text}</span>
               </label>
               {log && <span className="muted small">{log.at.slice(11)} · {staffName(staff, log.staffId) ?? '근무자 미선택'}</span>}
-              {editing && <button className="btn danger small-btn" onClick={() => dispatch({ type: 'DELETE_CHECK_ITEM', payload: { kind, id: item.id } })}>삭제</button>}
+              {isAdmin && editing && <button className="btn danger small-btn" onClick={() => dispatch({ type: 'DELETE_CHECK_ITEM', payload: { kind, id: item.id } })}>삭제</button>}
             </li>
           )
         })}
       </ul>
 
-      <form className="row" onSubmit={addItem}>
-        <input className="input" value={text} onChange={(e) => setText(e.target.value)} placeholder="확인할 일 추가 (예: 우유 진열, 마감 실사)" />
-        <button className="btn primary" type="submit">추가</button>
-      </form>
-      {list.length > 0 && <button className="link-btn" onClick={() => setEditing((v) => !v)}>{editing ? '편집 끝내기' : '항목 편집'}</button>}
+      {isAdmin ? (
+        <>
+          <form className="row" onSubmit={addItem}>
+            <input className="input" value={text} onChange={(e) => setText(e.target.value)} placeholder="확인할 일 추가 (예: 우유 진열, 마감 실사)" />
+            <button className="btn primary" type="submit">추가</button>
+          </form>
+          {list.length > 0 && <button className="link-btn" onClick={() => setEditing((v) => !v)}>{editing ? '편집 끝내기' : '항목 편집'}</button>}
+        </>
+      ) : (
+        <p className="muted small">항목 추가·삭제는 <Link className="link" to="/settings">관리자 로그인</Link> 뒤에 여기서 할 수 있어요.</p>
+      )}
     </div>
   )
 }

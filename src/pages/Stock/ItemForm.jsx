@@ -6,7 +6,7 @@ const EMPTY = { name: '', category: CATEGORIES[0], unit: UNITS[0], orderQty: '',
 
 // editingItem이 있으면 수정 모드, 없으면 등록 모드
 // 부모가 key를 바꿔서 다시 만들기 때문에 초기값만 받으면 됨
-export default function ItemForm({ editingItem, existingNames, onSubmit, onCancel }) {
+export default function ItemForm({ editingItem, existingNames, onSubmit, onCancel, closable = false }) {
   const [form, setForm] = useState(editingItem ? { ...editingItem, supplier: editingItem.supplier ?? '', orderQty: String(editingItem.orderQty ?? editingItem.minQty ?? '') } : EMPTY)
   const [error, setError] = useState('')
 
@@ -82,7 +82,7 @@ export default function ItemForm({ editingItem, existingNames, onSubmit, onCance
       )}
       {error && <p className="error">{error}</p>}
       <div className="actions">
-        {editingItem && <button type="button" className="btn" onClick={onCancel}>취소</button>}
+        {(editingItem || closable) && <button type="button" className="btn" onClick={onCancel}>{editingItem ? '취소' : '닫기'}</button>}
         <button type="submit" className="btn primary">{editingItem ? '수정 저장' : '등록'}</button>
       </div>
     </form>

@@ -1,5 +1,4 @@
 import { toDateStr } from './date.js'
-import { isRainy } from './weatherApi.js'
 
 export const total = (s) => s.card + s.cash
 
@@ -55,20 +54,6 @@ export function summarize(rows) {
   const cash = rows.reduce((s, r) => s + r.cash, 0)
   const days = rows.reduce((s, r) => s + r.days, 0)
   return { card, cash, total: card + cash, days, avg: days ? (card + cash) / days : 0, cardRate: card + cash ? card / (card + cash) : 0 }
-}
-
-// 날씨별 하루 평균 매출 (날씨 기록이 있는 날만)
-export function salesByWeather(sales) {
-  const groups = [
-    { name: '맑음·구름', test: (w) => !isRainy(w.code) && w.code <= 3 },
-    { name: '비·눈', test: (w) => isRainy(w.code) || (w.code >= 71 && w.code <= 86) },
-    { name: '추운 날 (10℃ 미만)', test: (w) => w.temp < 10 },
-    { name: '더운 날 (25℃ 이상)', test: (w) => w.temp >= 25 },
-  ]
-  return groups.map((g) => {
-    const days = sales.filter((s) => s.weather && g.test(s.weather))
-    return { name: g.name, avg: days.length ? days.reduce((sum, s) => sum + total(s), 0) / days.length : 0, days: days.length }
-  })
 }
 
 // 시간대 칸 이름: 13 → "13:00 ~ 14:00" (포스기 시간대별 매출 형식)

@@ -24,6 +24,13 @@ const GRIND_FIELDS = [
 ]
 
 // 근무자 목록 + 직원별 권한: 이름을 고르면 그 사람의 권한을 켜고 끌 수 있어요 (관리자 화면)
+const SECTIONS = [
+  { id: 'store', label: '매장 운영' },
+  { id: 'staff', label: '근무자·권한' },
+  { id: 'coffee', label: '추출·분쇄도' },
+  { id: 'data', label: '데이터' },
+]
+
 function StaffSetting({ staff, dispatch }) {
   const [name, setName] = useState('')
   const [msg, setMsg] = useState('')
@@ -259,6 +266,7 @@ export default function SettingsPage() {
   const { settings } = state
   const { logout, minutesLeft } = useAdmin()
   const [notice, setNotice] = useState('')
+  const [section, setSection] = useState('store')
   const save = (payload, text) => {
     dispatch({ type: 'UPDATE_SETTINGS', payload })
     setNotice(text)
@@ -271,27 +279,39 @@ export default function SettingsPage() {
         <span>🔓 관리자 모드 · 손대지 않으면 {minutesLeft}분 뒤 자동으로 끝나요</span>
         <button className="btn" onClick={logout}>관리자 모드 끝내기</button>
       </div>
+      {/* 설정이 많아져서 4묶음으로 나눔: 자주 바꾸는 것부터 */}
+      <div className="tabs page-tabs">
+        {SECTIONS.map((t) => <button key={t.id} className={`tab ${section === t.id ? 'active' : ''}`} onClick={() => { setSection(t.id); setNotice('') }}>{t.label}</button>)}
+      </div>
       {notice && <p className="notice">✓ {notice}</p>}
-      <div className="card store-summary">
-        <h2>우리 매장</h2>
-        <p><strong>{settings.store.name || '이름 없음'}</strong> · 머신 {settings.store.machine || '-'} · 그라인더 {settings.store.grinder || '-'}</p>
-        <Link className="btn" to="/setup">매장 시작 설정 다시 하기</Link>
-      </div>
-      <div className="card form" style={{ marginBottom: 16 }}>
-        <h2>배경 사진</h2>
-        <p className="muted">홈 화면과 각 페이지 위쪽에 보여요. 우리 매장 사진을 올려도 돼요.</p>
-        <PhotoPicker onDone={() => setNotice('배경 사진을 바꿨어요.')} />
-      </div>
-      <div className="grid half">
-        <StaffSetting staff={state.staff} dispatch={dispatch} />
-        <LocationSetting location={settings.location} onSave={(location) => save({ location }, `매장 위치를 ${location.name}(으)로 바꿨어요.`)} />
-        <HoursSetting key={`h-${settings.businessHours.open}-${settings.businessHours.close}`} value={settings.businessHours} onSave={(businessHours) => save({ businessHours }, `영업 시간을 ${businessHours.open}시~${businessHours.close}시로 저장했어요.`)} />
-        <RewardSetting key={settings.rewardThreshold} value={settings.rewardThreshold} onSave={(rewardThreshold) => save({ rewardThreshold }, '쿠폰 기준을 저장했어요.')} />
-        <StockSetting key={settings.shortageRate} value={settings.shortageRate} onSave={(shortageRate) => save({ shortageRate }, '재고 부족 경고 기준을 저장했어요.')} />
-        <GrindSetting key={JSON.stringify(settings.grind)} grind={settings.grind} onSave={(grind) => save({ grind }, '분쇄도 기준값을 저장했어요. 추천값에 바로 반영돼요.')} />
-        <ExtractSetting key={`ex-${settings.grind.targetDose}-${settings.grind.targetYield}-${settings.grind.yieldUnit}-${settings.grind.yieldStep}`} grind={settings.grind} onSave={(grind) => save({ grind }, '추출 기준을 저장했어요. 다음 샷 기록부터 이 값이 채워져요.')} />
-        <BackupPanel state={state} dispatch={dispatch} />
-      </div>
+      {section === 'store' && (
+        <>
+          <div className="card store-summary">
+            <h2>우리 매장</h2>
+            <p><strong>{settings.store.name || '이름 없음'}</strong> · 머신 {settings.store.machine || '-'} · 그라인더 {settings.store.grinder || '-'}</p>
+            <Link className="btn" to="/setup">매장 시작 설정 다시 하기</Link>
+          </div>
+          <div className="grid half">
+            <LocationSetting location={settings.location} onSave={(location) => save({ location }, `매장 위치를 ${location.name}(으)로 바꿨어요.`)} />
+            <HoursSetting key={`h-${settings.businessHours.open}-${settings.businessHours.close}`} value={settings.businessHours} onSave={(businessHours) => save({ businessHours }, `영업 시간을 ${businessHours.open}시~${businessHours.close}시로 저장했어요.`)} />
+            <RewardSetting key={settings.rewardThreshold} value={settings.rewardThreshold} onSave={(rewardThreshold) => save({ rewardThreshold }, '쿠폰 기준을 저장했어요.')} />
+            <StockSetting key={settings.shortageRate} value={settings.shortageRate} onSave={(shortageRate) => save({ shortageRate }, '재고 부족 경고 기준을 저장했어요.')} />
+          </div>
+          <div className="card form" style={{ marginTop: 16 }}>
+            <h2>배경 사진</h2>
+            <p className="muted">홈 화면과 각 페이지 위쪽에 보여요. 우리 매장 사진을 올려도 돼요.</p>
+            <PhotoPicker onDone={() => setNotice('배경 사진을 바꿨어요.')} />
+          </div>
+        </>
+      )}
+      {section === 'staff' && <StaffSetting staff={state.staff} dispatch={dispatch} />}
+      {section === 'coffee' && (
+        <div className="grid half">
+          <ExtractSetting key={`ex-${settings.grind.targetDose}-${settings.grind.targetYield}-${settings.grind.yieldUnit}-${settings.grind.yieldStep}`} grind={settings.grind} onSave={(grind) => save({ grind }, '추출 기준을 저장했어요. 다음 샷 기록부터 이 값이 채워져요.')} />
+          <GrindSetting key={JSON.stringify(settings.grind)} grind={settings.grind} onSave={(grind) => save({ grind }, '분쇄도 기준값을 저장했어요. 추천값에 바로 반영돼요.')} />
+        </div>
+      )}
+      {section === 'data' && <BackupPanel state={state} dispatch={dispatch} />}
     </section>
   )
 }

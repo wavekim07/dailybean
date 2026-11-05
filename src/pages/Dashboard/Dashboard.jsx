@@ -5,7 +5,7 @@ import StaffPicker from '../../components/common/StaffPicker.jsx'
 import Handoff from '../Ops/Handoff.jsx'
 import { useApp } from '../../context/AppContext.jsx'
 import useGrindRecommendation from '../../hooks/useGrindRecommendation.js'
-import { hasStockRecord, lowStockItems, orderQtyOf } from '../../utils/stockCalc.js'
+import { hasStockRecord, lowStockItems } from '../../utils/stockCalc.js'
 import { groupSales, summarize, total } from '../../utils/salesStats.js'
 import { toDateStr } from '../../utils/date.js'
 import { won } from '../../utils/format.js'
@@ -36,9 +36,8 @@ export default function Dashboard() {
   const unknown = items.filter((i) => !hasStockRecord(i, stockIns, counts))
   const todaySale = sales.find((s) => s.date === today)
   const week = summarize(groupSales(sales, 'week7')) // 오늘 포함 최근 7일 (매출 화면의 주간과 같은 기준)
-  const recent = [...shots].sort((a, b) => b.datetime.localeCompare(a.datetime)).slice(0, 4)
+  const last = [...shots].sort((a, b) => b.datetime.localeCompare(a.datetime))[0] // 홈에는 마지막 샷 하나만 (전체는 분쇄도 화면)
   const todayShots = shots.filter((s) => s.datetime.startsWith(today)).length
-  const beanName = (id) => items.find((i) => i.id === id)?.name ?? '-'
   const w = rec.weather?.current
 
   return (
@@ -80,13 +79,14 @@ export default function Dashboard() {
                   </Link>
                 )
               })}
-              <Link to="/ops?tab=stock" className={`today-check ${low.length ? 'alert' : ''}`}>
-                <span>재고</span>
+              {/* 재고 부족이면 바로 발주 목록으로 (예전 '발주 확인' 칸을 여기로 합침) */}
+              <Link to={low.length || waiting ? '/ops?tab=order' : '/ops?tab=stock'} className={`today-check ${low.length ? 'alert' : ''}`}>
+                <span>재고·발주{waiting ? ` · 입고 대기 ${waiting}` : ''}</span>
                 <strong>{items.length === 0 ? '등록 전' : low.length ? `${low.length}개 부족` : unknown.length === items.length ? '수량 입력 전' : '여유'}</strong>
                 <span className="glance-sub">{items.length === 0 ? '품목을 등록해 주세요' : low.length ? low.slice(0, 2).map((l) => l.item.name).join(', ') : unknown.length ? `${unknown.length}개 수량 입력 전` : '발주 걱정 없어요'}</span>
               </Link>
             </div>
-            <h3 className="sub-title">인수인계 <Link className="link" to="/ops?tab=handoff">남기기</Link></h3>
+            <h3 className="sub-title">인수인계 <Link className="link" to="/ops?tab=today">남기기</Link></h3>
             <Handoff compact />
           </div>
         </div>
@@ -122,7 +122,7 @@ export default function Dashboard() {
             {rec.adjust && <p className="panel-note">{rec.adjust.hour}시쯤 습도 {rec.adjust.humidity}% 예상 → <b>{rec.adjust.value.toFixed(1)}</b>로 다시 맞춰 보세요</p>}
             <div className="panel-actions">
               <Link className="btn primary big-btn" to="/grind">샷 기록하기</Link>
-              <span className="muted-light">오늘 기록 {todayShots}잔</span>
+              <span className="muted-light">오늘 기록 {todayShots}잔{last && <><br />마지막 {last.datetime.slice(11, 16)} · {Number(last.grind).toFixed(1)} · {last.time}초 {judgeTime(last.time, settings.grind.targetTime, settings.grind.higherIsFiner).label}</>}</span>
             </div>
           </div>
         <div className="panel">
@@ -132,43 +132,6 @@ export default function Dashboard() {
             <div><span className="muted">최근 7일</span><strong>{can('salesView') ? won(week.total) : '🔒'}</strong></div>
           </div>
           {todaySale?.memo && <p className="muted" style={{ marginTop: 8 }}>메모: {todaySale.memo}</p>}
-        </div>
-      </div>
-
-      {/* 3. 최근 샷과 발주 확인 */}
-      <div className="dash-columns">
-        <div className="panel">
-          <div className="panel-title"><h2>최근 샷</h2><Link className="link" to="/grind">전체 보기</Link></div>
-          {recent.length === 0 && <p className="muted">아직 샷 기록이 없어요. 첫 샷을 기록하면 다음 근무자가 바로 볼 수 있어요.</p>}
-          <ol className="timeline">
-            {recent.map((s) => {
-              const j = judgeTime(s.time, settings.grind.targetTime, settings.grind.higherIsFiner)
-              return (
-                <li key={s.id}>
-                  <span className="tl-time">{s.datetime.slice(5, 10).replace('-', '/')} {s.datetime.slice(11, 16)}</span>
-                  <span className="tl-body"><b>{Number(s.grind).toFixed(1)}</b> · {beanName(s.beanId)} · {s.time}초 <span className={`tag ${j.status}`}>{j.label}</span>{s.memo && <em className="tl-memo">“{s.memo}”</em>}</span>
-                </li>
-              )
-            })}
-          </ol>
-        </div>
-
-        <div className="panel">
-          <div className="panel-title"><h2>발주 확인</h2><Link className="link" to="/ops?tab=order">{waiting ? `발주 목록 ${waiting}개` : '발주 목록'}</Link></div>
-          {items.length === 0 && <p className="muted">재고 화면에서 품목과 기본 발주량을 등록해 주세요.</p>}
-          {items.length > 0 && low.length === 0 && <p className="ok-text">모든 품목이 발주량의 {Math.round((1 - settings.shortageRate) * 100)}% 넘게 남아 있어요.</p>}
-          <ul className="low-list">
-            {low.map(({ item, qty }) => {
-              const pct = Math.max(0, Math.min(100, (qty / orderQtyOf(item)) * 100))
-              return (
-                <li key={item.id}>
-                  <span>{item.name}</span>
-                  <span className="progress small-bar"><span className="bar danger" style={{ width: `${pct}%` }} /></span>
-                  <span className="danger-text">{Number(qty.toFixed(2))}{item.unit}</span>
-                </li>
-              )
-            })}
-          </ul>
         </div>
       </div>
 
