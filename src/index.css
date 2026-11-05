@@ -417,3 +417,12 @@ button.cal-cell { cursor: pointer; }
 .cal-cell.lv4 .sun, .cal-cell.lv4 .sat { color: #fff; }
 .cal-cell.lv4 .cal-dot { background: #fff; }
 @media (min-width: 768px) { .cal-cell { min-height: 64px; padding: 6px; } .cal-amt { font-size: 13px; } }
+
+/* 시간대별 매출 입력 */
+.hourly { display: flex; flex-direction: column; gap: 8px; background: #f6f1ea; border-radius: 10px; padding: 12px; }
+.hourly-grid { display: grid; grid-template-columns: 1fr; gap: 6px; }
+.form .hourly-row { flex-direction: row; align-items: center; gap: 10px; color: var(--text); }
+.hourly-row span { flex: 0 0 120px; font-size: 13px; font-variant-numeric: tabular-nums; }
+.hourly-row .input { padding: 6px 10px; }
+.warn-inline { color: #8a5a00; }
+@media (min-width: 768px) { .hourly-grid { grid-template-columns: 1fr 1fr; } }

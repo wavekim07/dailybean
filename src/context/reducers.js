@@ -196,6 +196,7 @@ export function rootReducer(state, action) {
         settings: {
           ...initialState.settings, ...s,
           store: { ...initialState.settings.store, ...s.store },
+          businessHours: { ...initialState.settings.businessHours, ...s.businessHours },
           checklists: { ...initialState.settings.checklists, ...s.checklists },
           grind: { ...initialState.settings.grind, ...s.grind },
         },

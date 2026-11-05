@@ -22,6 +22,7 @@ export const initialState = {
     },
     photo: 'table', // 배경 사진 (utils/photos.js의 id, 또는 'custom')
     customPhoto: null, // 사용자가 올린 사진 (data URL)
+    businessHours: { open: 8, close: 22 }, // 영업 시간 (시간대별 매출 칸을 이 범위로 보여 줌)
     rewardThreshold: 45000, // 무료 음료 쿠폰 기준 누적 금액
     shortageRate: 0.7,
     currentStaffId: null, // 지금 근무자 (로그인 없이 이름만 고름)
@@ -31,7 +32,7 @@ export const initialState = {
   stockIns: [], // { id, date, itemId, qty, roastDate }
   counts: [], // { id, date, itemId, qty }  마감 실사
   shots: [], // { id, datetime, beanId, grind, dose, time, yield, memo, recommended, weather }
-  sales: [], // { id, date, card, cash, memo, weather }
+  sales: [], // { id, date, card, cash, memo, weather, hourly: { '13': 146000 } }  hourly = 포스기 시간대별 매출 (13 = 13:00~14:00)
   customers: [],
   staff: [], // { id, name, perms: { stock, items, orders, shots, salesInput, salesView, customers } }
   auth: { admin: null }, // 관리자 비밀번호 해시 { salt, hash, iterations, recovery: { salt, hash, iterations } } — 비밀번호 자체는 저장 안 함

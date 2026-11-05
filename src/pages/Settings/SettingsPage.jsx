@@ -140,6 +140,31 @@ function ExtractSetting({ grind, onSave }) {
   )
 }
 
+// 영업 시간: 매출 입력의 시간대별 칸과 시간대별 평균 그래프를 이 범위로 보여 줘요
+function HoursSetting({ value, onSave }) {
+  const [open, setOpen] = useState(String(value.open))
+  const [close, setClose] = useState(String(value.close))
+  const [msg, setMsg] = useState('')
+  const submit = (e) => {
+    e.preventDefault()
+    const o = Number(open)
+    const c = Number(close)
+    if (!Number.isInteger(o) || !Number.isInteger(c) || o < 0 || c > 24 || o >= c) return setMsg('0~24 사이 정수로, 여는 시간이 닫는 시간보다 빠르게 넣어 주세요.')
+    onSave({ open: o, close: c })
+  }
+  return (
+    <form className="card form" onSubmit={submit}>
+      <h2>영업 시간</h2>
+      <div className="row">
+        <label>여는 시간 (시)<input className="input" inputMode="numeric" value={open} onChange={(e) => { setOpen(e.target.value.replace(/\D/g, '')); setMsg('') }} /></label>
+        <label>닫는 시간 (시)<input className="input" inputMode="numeric" value={close} onChange={(e) => { setClose(e.target.value.replace(/\D/g, '')); setMsg('') }} /></label>
+      </div>
+      <p className="muted">{msg || '매출 입력의 시간대별 칸과 시간대별 평균 그래프가 이 시간만큼 나와요.'}</p>
+      <div className="actions"><button className="btn primary" type="submit">저장</button></div>
+    </form>
+  )
+}
+
 function RewardSetting({ value, onSave }) {
   const [v, setV] = useState(String(value))
   const [msg, setMsg] = useState('')
@@ -258,6 +283,7 @@ export default function SettingsPage() {
       <div className="grid half">
         <StaffSetting staff={state.staff} dispatch={dispatch} />
         <LocationSetting location={settings.location} onSave={(location) => save({ location }, `매장 위치를 ${location.name}(으)로 바꿨어요.`)} />
+        <HoursSetting key={`h-${settings.businessHours.open}-${settings.businessHours.close}`} value={settings.businessHours} onSave={(businessHours) => save({ businessHours }, `영업 시간을 ${businessHours.open}시~${businessHours.close}시로 저장했어요.`)} />
         <RewardSetting key={settings.rewardThreshold} value={settings.rewardThreshold} onSave={(rewardThreshold) => save({ rewardThreshold }, '쿠폰 기준을 저장했어요.')} />
         <StockSetting key={settings.shortageRate} value={settings.shortageRate} onSave={(shortageRate) => save({ shortageRate }, '재고 부족 경고 기준을 저장했어요.')} />
         <GrindSetting key={JSON.stringify(settings.grind)} grind={settings.grind} onSave={(grind) => save({ grind }, '분쇄도 기준값을 저장했어요. 추천값에 바로 반영돼요.')} />

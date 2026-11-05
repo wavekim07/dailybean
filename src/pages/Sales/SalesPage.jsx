@@ -4,12 +4,12 @@ import ConfirmDialog from '../../components/common/ConfirmDialog.jsx'
 import { useApp } from '../../context/AppContext.jsx'
 import { toDateStr } from '../../utils/date.js'
 import { won } from '../../utils/format.js'
-import { groupSales, salesByWeather, summarize, total } from '../../utils/salesStats.js'
+import { groupSales, hourLabel, hourlyAverage, hoursOf, summarize, total } from '../../utils/salesStats.js'
 import { fetchWeatherAt, weatherText } from '../../utils/weatherApi.js'
 import Guard from '../../components/auth/Guard.jsx'
 import { usePermission } from '../../context/AdminContext.jsx'
 import SalesForm from './SalesForm.jsx'
-import { PaymentPieChart, SalesBarChart, WeatherSalesChart } from './SalesCharts.jsx'
+import { HourlyAvgChart, PaymentPieChart, SalesBarChart } from './SalesCharts.jsx'
 import SalesCalendar from './SalesCalendar.jsx'
 
 const PERIODS = [
@@ -48,7 +48,8 @@ export default function SalesPage() {
 
   const rows = useMemo(() => groupSales(sales, period), [sales, period])
   const sum = summarize(rows)
-  const byWeather = useMemo(() => salesByWeather(sales), [sales])
+  const hourly = useMemo(() => hourlyAverage(sales, month, hoursOf(settings.businessHours)), [sales, month, settings.businessHours])
+  const peak = hourly.days ? hourly.rows.reduce((a, r) => (r.avg > a.avg ? r : a), hourly.rows[0]) : null
   const monthList = sales.filter((s) => s.date.startsWith(month)).sort((a, b) => b.date.localeCompare(a.date))
 
   return (
@@ -56,7 +57,7 @@ export default function SalesPage() {
       <PageHeader photo title="매출" description="하루 카드·현금 매출을 입력하고 기간별로 확인해요." />
       <div className="two-col">
         <div className="stack">
-          <Guard perm="salesInput"><SalesForm key={date + (existing?.id ?? '')} date={date} existing={existing} saving={saving} onDateChange={setDate} onSubmit={handleSubmit} /></Guard>
+          <Guard perm="salesInput"><SalesForm key={date + (existing?.id ?? '')} date={date} existing={existing} saving={saving} onDateChange={setDate} onSubmit={handleSubmit} businessHours={settings.businessHours} /></Guard>
           <div className="card">
             <div className="grind-head">
               <h2>매출 목록</h2>
@@ -96,10 +97,12 @@ export default function SalesPage() {
             <SalesBarChart rows={rows} />
           </div>
           <SalesCalendar sales={sales} month={month} onMonthChange={setMonth} onPick={can('salesInput') ? (d) => { setDate(d); window.scrollTo({ top: 0, behavior: 'smooth' }) } : undefined} />
-          <div className="grid half">
-            <div className="card"><h2>결제 비중</h2><PaymentPieChart card={sum.card} cash={sum.cash} /></div>
-            <div className="card"><h2>날씨별 하루 평균 (전체 기간)</h2><WeatherSalesChart rows={byWeather} /></div>
+          <div className="card">
+            <h2>{Number(month.slice(5))}월 시간대별 평균</h2>
+            <p className="muted">{hourly.days ? `시간대별 금액을 넣은 ${hourly.days}일 기준 · 가장 바쁜 시간 ${hourLabel(peak.hour)} (하루 평균 ${won(peak.avg)})` : '하루 중 어느 시간이 바쁜지 보여 줘요.'}</p>
+            <HourlyAvgChart rows={hourly.rows} days={hourly.days} />
           </div>
+          <div className="card"><h2>결제 비중</h2><PaymentPieChart card={sum.card} cash={sum.cash} /></div>
         </div>
         </Guard>
       </div>
