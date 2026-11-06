@@ -16,8 +16,8 @@ export const initialState = {
       targetTime: [26, 30], // 목표 추출 시간(초)
       targetDose: 19, // 목표 도징량(g)
       targetYield: 32, // 목표 추출량 (파도김 기준 32)
-      yieldUnit: 'ml',
-      yieldStep: 2, // 맛 평가로 추출량을 조절할 때 한 번에 바꾸는 양 // 추출량 단위: 'g'(저울) 또는 'ml'(샷잔 눈금)
+      yieldUnit: 'ml', // 추출량 단위: 'g'(저울) 또는 'ml'(샷잔 눈금)
+      yieldStep: 2, // 맛 평가로 추출량을 조절할 때 한 번에 바꾸는 양
       restDays: 3, // 로스팅 후 숙성 기간(일)
       restAdj: -0.1, // 숙성 기간 보정 (음수 = 굵게)
     },
@@ -25,19 +25,19 @@ export const initialState = {
     customPhoto: null, // 사용자가 올린 사진 (data URL)
     businessHours: { open: 8, close: 22 }, // 영업 시간 (시간대별 매출 칸을 이 범위로 보여 줌)
     rewardThreshold: 45000, // 무료 음료 쿠폰 기준 누적 금액
-    shortageRate: 0.7,
+    shortageRate: 0.7, // 기본 발주량에서 70% 이상 줄면 재고 부족 경고
     currentStaffId: null, // 지금 근무자 (로그인 없이 이름만 고름)
-    checklists: { open: [], close: [] }, // 오픈·마감 확인 항목 [{ id, text }] — 매장이 직접 정함 // 기본 발주량에서 70% 이상 줄면 재고 부족 경고
+    checklists: { open: [], close: [] }, // 오픈·마감 확인 항목 [{ id, text }] — 매장이 직접 정함
   },
   items: [], // { id, name, category, unit, orderQty, supplier }  orderQty = 기본 발주량, supplier = 거래처
-  stockIns: [], // { id, date, itemId, qty, roastDate }
-  counts: [], // { id, date, itemId, qty }  마감 실사
+  stockIns: [], // { id, date, at, itemId, qty, roastDate, orderId, staffId }  at = 기록 시각(초까지)
+  counts: [], // { id, date, at, itemId, qty, staffId }  실사 (지금 있는 양)
   shots: [], // { id, datetime, beanId, grind, dose, time, yield, memo, recommended, weather }
   sales: [], // { id, date, card, cash, memo, weather, hourly: { '13': 146000 } }  hourly = 포스기 시간대별 매출 (13 = 13:00~14:00)
-  customers: [],
+  customers: [], // { id, name, phone, accAmount, coupons, history }
   staff: [], // { id, name, perms: { stock, items, orders, shots, salesInput, salesView, customers } }
   auth: { admin: null }, // 관리자 비밀번호 해시 { salt, hash, iterations, recovery: { salt, hash, iterations } } — 비밀번호 자체는 저장 안 함
   notes: [], // 인수인계 { id, datetime, staffId, text, done, doneBy, doneAt }
   orders: [], // 발주 { id, itemId, qty, status: draft|ordered|received, createdAt, orderedAt, receivedAt, stockInId, staffId }
-  checkLogs: [], // 체크리스트 기록 { id, date, type, itemId, staffId, at } // { id, name, phone, accAmount, coupons, history }
+  checkLogs: [], // 체크리스트 기록 { id, date, kind, itemId, staffId, at }
 }

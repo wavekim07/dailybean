@@ -77,7 +77,7 @@ export default function ItemForm({ editingItem, existingNames, onSubmit, onCance
         <label>
           지금 있는 양 (선택)
           <input className="input" name="currentQty" inputMode="decimal" value={form.currentQty} onChange={handleChange} placeholder={`지금 매장에 있는 양 (${form.unit})`} />
-          <span className="muted small">넣으면 오늘 실사로 저장돼서 바로 현재 재고가 보여요. 비워 두면 '재고 입력 전'으로 표시돼요.</span>
+          <span className="muted small">넣으면 오늘 재고로 저장돼서 바로 현재 재고가 보여요. 비워 두면 '재고 입력 전'으로 표시돼요.</span>
         </label>
       )}
       {error && <p className="error">{error}</p>}

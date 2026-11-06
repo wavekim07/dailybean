@@ -64,7 +64,7 @@ export default function Checklist() {
       {isAdmin ? (
         <>
           <form className="row" onSubmit={addItem}>
-            <input className="input" value={text} onChange={(e) => setText(e.target.value)} placeholder="확인할 일 추가 (예: 우유 진열, 마감 실사)" />
+            <input className="input" value={text} onChange={(e) => setText(e.target.value)} placeholder="확인할 일 추가 (예: 우유 진열, 마감 재고 세기)" />
             <button className="btn primary" type="submit">추가</button>
           </form>
           {list.length > 0 && <button className="link-btn" onClick={() => setEditing((v) => !v)}>{editing ? '편집 끝내기' : '항목 편집'}</button>}

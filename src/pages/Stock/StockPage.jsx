@@ -24,13 +24,13 @@ export default function StockPage({ embedded = false }) {
 
   return (
     <section>
-      {!embedded && <PageHeader photo title="재고" description="품목과 현재 재고를 관리하고, 입고와 마감 실사를 기록해요." />}
+      {!embedded && <PageHeader photo title="재고" description="품목과 현재 재고를 관리하고, 입고와 마감 재고를 기록해요." />}
       <ItemsPanel />
 
       {items.length > 0 && (
         <Guard perm="stock">
           <div className="stock-more">
-            <button className={`btn ${panel === 'count' ? 'primary' : ''}`} onClick={() => toggle('count')}>마감 실사 한 번에 입력</button>
+            <button className={`btn ${panel === 'count' ? 'primary' : ''}`} onClick={() => toggle('count')}>마감 재고 한 번에 입력</button>
             <button className={`btn ${panel === 'log' ? 'primary' : ''}`} onClick={() => toggle('log')}>날짜별 입고·사용량</button>
             {panel && (
               <label className="inline">

@@ -13,14 +13,14 @@ export default function DailyCountForm({ date, items, counts, onSubmit }) {
     if (filled.length === 0) return setMessage('남은 수량을 하나 이상 입력해 주세요.')
     if (filled.some(([, v]) => Number.isNaN(Number(v)) || Number(v) < 0)) return setMessage('수량은 0 이상의 숫자로 입력해 주세요.')
     onSubmit(Object.fromEntries(filled.map(([id, v]) => [id, Number(v)])))
-    setMessage(`${filled.length}개 품목 실사를 저장했어요.`)
+    setMessage(`${filled.length}개 품목 마감 재고를 저장했어요.`)
   }
 
   if (items.length === 0) return null
 
   return (
     <form className="card form" onSubmit={handleSubmit}>
-      <h2>마감 재고 실사</h2>
+      <h2>마감 재고 입력</h2>
       <p className="muted">마감 때 남은 수량을 입력하면 오늘 사용량이 계산돼요.</p>
       <div className="count-grid">
         {items.map((i) => (
@@ -37,7 +37,7 @@ export default function DailyCountForm({ date, items, counts, onSubmit }) {
       </div>
       {message && <p className="muted">{message}</p>}
       <div className="actions">
-        <button type="submit" className="btn primary">실사 저장</button>
+        <button type="submit" className="btn primary">마감 재고 저장</button>
       </div>
     </form>
   )

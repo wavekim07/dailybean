@@ -13,7 +13,7 @@ export default function UsageTable({ rows }) {
           {rows.map(({ item, prevQty, prevDate, ins, todayQty, usage, low }) => (
             <tr key={item.id} className={low ? 'low' : ''}>
               <td>{item.name}{low && <span className="tag danger">⚠️ 부족</span>}</td>
-              <td title={prevDate ? `${prevDate} 실사` : '이전 실사 없음'}>{fmt(prevQty)}</td>
+              <td title={prevDate ? `${prevDate}에 센 재고` : '전에 센 재고 없음'}>{fmt(prevQty)}</td>
               <td>{ins ? `+${fmt(ins)}` : '-'}</td>
               <td>{fmt(todayQty)}</td>
               <td><strong>{fmt(usage)}</strong> {usage !== null && item.unit}</td>
@@ -21,7 +21,7 @@ export default function UsageTable({ rows }) {
           ))}
         </tbody>
       </table>
-      <p className="muted">사용량 = 전날 재고 + 입고 − 오늘 재고. 전날 실사가 없으면 계산되지 않아요.</p>
+      <p className="muted">사용량 = 전날 재고 + 입고 − 오늘 재고. 전날 센 재고가 없으면 계산되지 않아요.</p>
     </div>
   )
 }
