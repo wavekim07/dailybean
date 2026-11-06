@@ -68,5 +68,3 @@ export function weatherText(code) {
   if (code <= 86) return '눈'
   return '뇌우'
 }
-
-export const isRainy = (code) => code >= 51 && code !== 71 && code !== 73 && code !== 75 && code !== 77 && code !== 85 && code !== 86
