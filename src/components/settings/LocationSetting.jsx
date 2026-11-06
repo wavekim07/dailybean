@@ -1,4 +1,5 @@
 import { lazy, Suspense, useState } from 'react'
+import { dongLabel, loadDongs, nearestDong } from '../../utils/nearestDong.js'
 
 // 지도 라이브러리(Leaflet)는 위치를 고를 때만 불러옴 (첫 화면을 가볍게)
 const LocationMap = lazy(() => import('./LocationMap.jsx'))
@@ -11,8 +12,17 @@ export default function LocationSetting({ location, onSave }) {
   const [msg, setMsg] = useState('')
   const [pick, setPick] = useState(null) // 고르는 중인 좌표 { lat, lon, accuracy, moved }
   const [name, setName] = useState('')
+  const [typed, setTyped] = useState(false) // 사용자가 이름을 직접 고쳤는지 (고쳤으면 자동으로 덮어쓰지 않음)
+  const [dongs, setDongs] = useState(null) // 기상청 읍·면·동 목록 (위치를 고를 때 불러옴)
 
-  const start = (p) => { setPick(p); setName(location.name || ''); setMsg('') }
+  // 핀 자리에서 가장 가까운 동 → 이름 칸 기본값
+  const near = pick && dongs ? nearestDong(dongs, pick.lat, pick.lon) : null
+  const shownName = typed ? name : dongLabel(near)
+
+  const start = (p) => {
+    setPick(p); setName(''); setTyped(false); setMsg('')
+    loadDongs().then(setDongs).catch(() => setDongs([]))
+  }
 
   // 브라우저 위치 정보(Geolocation API): 사용자가 허용해야 하고, HTTPS에서만 동작
   const useHere = () => {
@@ -28,7 +38,7 @@ export default function LocationSetting({ location, onSave }) {
 
   const save = (e) => {
     e.preventDefault()
-    onSave({ name: name.trim() || '우리 매장', lat: round3(pick.lat), lon: round3(pick.lon) })
+    onSave({ name: shownName.trim() || '우리 매장', lat: round3(pick.lat), lon: round3(pick.lon) })
     setPick(null)
     setMsg('저장했어요.')
   }
@@ -54,8 +64,9 @@ export default function LocationSetting({ location, onSave }) {
             {pick.moved ? ' · 핀으로 정한 위치' : ` · 브라우저가 찾은 위치, 오차 약 ${pick.accuracy}m`}
           </p>
           {!pick.moved && pick.accuracy > 1000 && <p className="error">오차가 커요. 핀을 매장 자리로 옮겨 주세요.</p>}
+          {near && <p className="muted small">가장 가까운 동: <b>{near.sido} {near.sigungu} {near.dong}</b> (동 중심에서 약 {near.km < 1 ? `${Math.round(near.km * 1000)}m` : `${near.km.toFixed(1)}km`}) · 출처: 기상청</p>}
           <div className="row">
-            <input className="input" value={name} onChange={(e) => setName(e.target.value)} placeholder="위치 이름 (예: 신논현역 매장)" aria-label="위치 이름" />
+            <input className="input" value={shownName} onChange={(e) => { setName(e.target.value); setTyped(true) }} placeholder="위치 이름 (예: 신논현역 매장)" aria-label="위치 이름" />
             <button className="btn primary" type="submit">이 위치로 저장</button>
             <button className="btn" type="button" onClick={() => setPick(null)}>취소</button>
           </div>

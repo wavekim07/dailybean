@@ -26,7 +26,8 @@ export default function LocationMap({ lat, lon, onMove }) {
     L.tileLayer(TILE_URL, { maxZoom: 19, attribution: ATTRIBUTION }).addTo(map)
     const pin = L.marker(firstRef.current, { draggable: true, icon: pinIcon, keyboard: true, title: '매장 위치 핀' }).addTo(map)
     const report = (ll) => moveRef.current(ll.lat, ll.lng)
-    pin.on('dragend', () => report(pin.getLatLng()))
+    // 핀을 지도 밖까지 끌었으면 지도를 그쪽으로 옮겨 핀이 다시 보이게 함
+    pin.on('dragend', () => { map.panInside(pin.getLatLng(), { padding: [30, 30] }); report(pin.getLatLng()) })
     map.on('click', (e) => { pin.setLatLng(e.latlng); report(e.latlng) })
     mapRef.current = map
     pinRef.current = pin

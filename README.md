@@ -31,7 +31,9 @@
 | `/settings` | 설정 |
 
 ## 기술
-React 19, Vite, React Router, Context + useReducer, localStorage, Recharts, Open-Meteo API (키 없음)
+React 19, Vite, React Router, Context + useReducer, localStorage, Recharts, Open-Meteo API (키 없음), Leaflet 1.9.4 + OpenStreetMap 타일(매장 위치 지도)
+
+
 
 ## 실행
 ```bash
