@@ -33,7 +33,11 @@
 ## 기술
 React 19, Vite, React Router, Context + useReducer, localStorage, Recharts, Open-Meteo API (키 없음), Leaflet 1.9.4 + OpenStreetMap 타일(매장 위치 지도)
 
+## 데이터 출처
 
+- 날씨: [Open-Meteo](https://open-meteo.com/) (CC BY 4.0)
+- 지도: © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors (ODbL), [Leaflet](https://leafletjs.com/) (BSD-2-Clause)
+- 읍·면·동 이름과 좌표: 기상청 단기예보 조회서비스 오픈API 활용가이드 '격자_위경도(2610)' 엑셀 ([공공데이터포털](https://www.data.go.kr/data/15084084/openapi.do), 공공누리 제1유형 출처표시) → `src/data/kmaDong.json`
 
 ## 실행
 ```bash
