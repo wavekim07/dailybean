@@ -17,9 +17,12 @@ export default function LocationSetting({ location, onSave }) {
     setMsg('검색 중…')
     setHere(null)
     try {
-      const r = await searchCity(query.trim())
+      const q = query.trim()
+      let r = await searchCity(q)
+      // '의정부시'처럼 끝에 행정구역 글자가 붙으면 못 찾는 경우가 있어, 결과가 없을 때 한 번 떼고 다시 찾음
+      if (r.length === 0 && q.length > 2 && /[시군구동읍면]$/.test(q)) r = await searchCity(q.slice(0, -1))
       setResults(r)
-      setMsg(r.length ? '' : '검색 결과가 없어요. 서울의 구 이름처럼 검색이 안 되는 지역이 있어요. 매장에서 "현재 위치 사용"을 눌러 주세요.')
+      setMsg(r.length ? '' : '검색 결과가 없어요. 이 검색은 시·군 단위까지만 잘 돼요(동·구 이름은 대부분 안 나와요). 가까운 시·군 이름으로 찾거나, 매장에서 "현재 위치 사용"을 눌러 주세요.')
     } catch (err) {
       setMsg(err.message)
     }
@@ -51,7 +54,7 @@ export default function LocationSetting({ location, onSave }) {
         </form>
       )}
       <form className="row" onSubmit={search}>
-        <input className="input" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="또는 시·군 이름 검색 (예: 의정부)" />
+        <input className="input" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="또는 시·군 이름 검색 (예: 의정부, 성남)" />
         <button className="btn" type="submit">검색</button>
       </form>
       {msg && <p className="muted">{msg}</p>}
