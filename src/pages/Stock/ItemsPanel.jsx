@@ -12,7 +12,7 @@ import { newId } from '../../context/reducers.js'
 import { toDateStr } from '../../utils/date.js'
 import { activeOrderOf } from '../../utils/orders.js'
 
-// 재고 페이지의 "품목·현재 재고" 탭: 품목 등록·수정·삭제·검색 + 현재 추정 재고
+// 재고 화면 위쪽: 품목 등록·수정·삭제·검색 + 현재 재고, 줄마다 입고·수량 입력
 export default function ItemsPanel() {
   const { state, dispatch } = useApp()
   const { can } = usePermission()
@@ -81,7 +81,7 @@ export default function ItemsPanel() {
             </select>
           </div>
           <p className="muted count">{filtered.length}개 / 전체 {items.length}개</p>
-          <ItemList items={filtered} stockOf={(item) => currentStock(item, stockIns, counts)} known={(item) => hasStockRecord(item, stockIns, counts)} onCount={can('stock') ? saveCount : undefined} shortageRate={settings.shortageRate} onEdit={can('items') ? setEditingItem : undefined} onDelete={can('items') ? setDeleteTarget : undefined}
+          <ItemList items={filtered} stockOf={(item) => currentStock(item, stockIns, counts)} known={(item) => hasStockRecord(item, stockIns, counts)} onCount={can('stock') ? saveCount : undefined} onStockIn={can('stock') ? (item, d) => dispatch({ type: 'ADD_STOCK_IN', payload: { ...d, itemId: item.id } }) : undefined} shortageRate={settings.shortageRate} onEdit={can('items') ? setEditingItem : undefined} onDelete={can('items') ? setDeleteTarget : undefined}
             inOrder={(item) => !!activeOrderOf(orders, item.id)} onOrder={can('orders') ? (item) => dispatch({ type: 'ADD_ORDER', payload: { itemId: item.id, qty: orderQtyOf(item) } }) : undefined} />
         </div>
       </div>

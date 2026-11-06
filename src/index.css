@@ -493,3 +493,9 @@ button.cal-cell { cursor: pointer; }
 .grind-layout { display: grid; grid-template-columns: 1fr; gap: 16px; align-items: start; margin-bottom: 16px; }
 .grind-layout > * { min-width: 0; }
 @media (min-width: 1025px) { .grind-layout { grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr); } }
+
+/* 재고 화면 아래: 가끔 여는 마감 실사·날짜별 기록 */
+.stock-more { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 16px 0 12px; }
+.stock-more .inline { margin-left: auto; }
+.count-inline .inline { display: flex; flex-direction: row; align-items: center; gap: 6px; }
+@media (max-width: 768px) { .stock-more .inline { margin-left: 0; } }
