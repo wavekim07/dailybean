@@ -19,6 +19,7 @@ export default function OrderList() {
   const [receiving, setReceiving] = useState(null) // { id, date, qty, roastDate, error }
   const [deleteId, setDeleteId] = useState(null)
   const [showDone, setShowDone] = useState(false)
+  const [qtyError, setQtyError] = useState(null) // 수량이 비었거나 0인 거래처 이름
 
   const active = activeOrders(orders)
   const groups = groupBySupplier(active, items)
@@ -40,7 +41,15 @@ export default function OrderList() {
     setPickQty('')
   }
 
+  // 수량이 비었거나 0인 발주가 있으면 문자 복사·주문 보냄을 막음 (0개 주문 문자가 나가지 않게)
+  const qtyOk = (g) => {
+    const ok = g.rows.every(({ order }) => order.status !== 'draft' || Number(order.qty) > 0)
+    setQtyError(ok ? null : g.supplier)
+    return ok
+  }
+
   const copy = async (g) => {
+    if (!qtyOk(g)) return
     const text = orderMessage(settings.store.name, g.supplier, g.rows)
     try {
       await navigator.clipboard.writeText(text)
@@ -108,9 +117,10 @@ export default function OrderList() {
                 <strong>{g.supplier}</strong>
                 <span className="actions">
                   <button className="btn" onClick={() => copy(g)}>{copied === g.supplier ? '복사했어요' : '문자 복사'}</button>
-                  {drafts.length > 0 && <button className="btn primary" onClick={() => dispatch({ type: 'MARK_ORDERED', payload: drafts.map(({ order }) => order.id) })}>주문 보냄</button>}
+                  {drafts.length > 0 && <button className="btn primary" onClick={() => qtyOk(g) && dispatch({ type: 'MARK_ORDERED', payload: drafts.map(({ order }) => order.id) })}>주문 보냄</button>}
                 </span>
               </div>
+              {qtyError === g.supplier && <p className="error" role="alert">수량이 비었거나 0인 품목이 있어요. 0보다 큰 수량을 넣어 주세요.</p>}
               {g.supplier === NO_SUPPLIER && <p className="muted small">재고 탭 → 품목 수정에서 거래처를 적으면 거래처별로 묶여요.</p>}
               {preview === g.supplier && (
                 <textarea className="input" readOnly rows={g.rows.length + 1} value={orderMessage(settings.store.name, g.supplier, g.rows)} onFocus={(e) => e.target.select()} />
@@ -123,7 +133,7 @@ export default function OrderList() {
                       {order.status === 'draft' ? (
                         <label className="inline">수량
                           <input className="input qty-input" inputMode="decimal" value={order.qty}
-                            onChange={(e) => { const v = e.target.value; if (v === '' || !Number.isNaN(Number(v))) dispatch({ type: 'UPDATE_ORDER_QTY', payload: { id: order.id, qty: v } }) }} />
+                            onChange={(e) => { const v = e.target.value; if (/^\d*\.?\d*$/.test(v)) { setQtyError(null); dispatch({ type: 'UPDATE_ORDER_QTY', payload: { id: order.id, qty: v } }) } }} />
                           {item?.unit}
                         </label>
                       ) : (

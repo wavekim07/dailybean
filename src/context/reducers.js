@@ -56,8 +56,13 @@ export function rootReducer(state, action) {
       if (state.orders.some((o) => o.itemId === payload.itemId && o.status !== 'received')) return state
       return { ...state, orders: add(state.orders, withStaff(state, { status: 'draft', createdAt: nowStr(), ...payload })) }
     }
-    case 'UPDATE_ORDER_QTY':
-      return { ...state, orders: update(state.orders, { id: payload.id, qty: Number(payload.qty) }) }
+    case 'UPDATE_ORDER_QTY': {
+      // 입력 중 빈칸은 ''로 잠시 두고(지우고 다시 쓰기), 음수·숫자 아닌 값은 받지 않음
+      if (payload.qty === '') return { ...state, orders: update(state.orders, { id: payload.id, qty: '' }) }
+      const qty = Number(payload.qty)
+      if (Number.isNaN(qty) || qty < 0) return state
+      return { ...state, orders: update(state.orders, { id: payload.id, qty }) }
+    }
     case 'MARK_ORDERED': {
       // payload: 주문 보낸 발주 id 목록 (거래처 하나 단위로 보냄)
       const ids = new Set(payload)

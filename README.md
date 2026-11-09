@@ -43,4 +43,5 @@ React 19, Vite, React Router, Context + useReducer, localStorage, Recharts, Open
 ```bash
 npm install
 npm run dev
+npm test        # 계산·데이터 변경 자동 테스트 (Vitest)
 ```
