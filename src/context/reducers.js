@@ -15,8 +15,12 @@ const update = (list, data) => list.map((x) => (x.id === data.id ? { ...x, ...da
 const remove = (list, id) => list.filter((x) => x.id !== id)
 
 const nowStr = () => `${toDateStr()}T${new Date().toTimeString().slice(0, 5)}`
-// 입고·실사 기록 시각 (초까지): 같은 날 실사와 입고의 앞뒤를 가리는 데 씀 (utils/stockCalc.js)
-const stampStr = () => `${toDateStr()}T${new Date().toTimeString().slice(0, 8)}`
+// 입고·실사 기록 시각 (1/1000초까지): 같은 날 실사와 입고의 앞뒤를 가리는 데 씀 (utils/stockCalc.js)
+// 초까지만 남기면 같은 1초 안에 실사와 입고가 기록될 때 입고가 재고에 안 더해짐 (화면 흐름 테스트에서 발견)
+const stampStr = () => {
+  const d = new Date()
+  return `${toDateStr(d)}T${d.toTimeString().slice(0, 8)}.${String(d.getMilliseconds()).padStart(3, '0')}`
+}
 
 // 기록에 "누가"를 붙임: 지금 근무자 (설정에서 고름)
 const withStaff = (state, data) => ({ staffId: state.settings.currentStaffId ?? null, ...data })
