@@ -6,7 +6,7 @@ import ConfirmDialog from '../../components/common/ConfirmDialog.jsx'
 import GrindRecommendCard from '../../components/grind/GrindRecommendCard.jsx'
 import { useApp } from '../../context/AppContext.jsx'
 import useGrindRecommendation from '../../hooks/useGrindRecommendation.js'
-import { calcGrind, judgeTime, latestRoastDate } from '../../utils/grindCalc.js'
+import { judgeTime, latestRoastDate, shotRecommendations } from '../../utils/grindCalc.js'
 import { fetchWeatherAt } from '../../utils/weatherApi.js'
 import Guard from '../../components/auth/Guard.jsx'
 import { usePermission } from '../../context/AdminContext.jsx'
@@ -49,10 +49,11 @@ export default function GrindPage() {
       }
     }
     const roastDate = latestRoastDate(stockIns.filter((s) => s.date <= data.datetime.slice(0, 10)), data.beanId)
-    const recommended = weather ? calcGrind(weather, settings.grind, { roastDate, onDate: data.datetime.slice(0, 10) }).value : null
     // 어떤 그라인더로 맞춘 기록인지 남겨서, 그라인더별 평균과 보정에 씀
     const grinder = editingShot?.grinder ?? settings.store.grinder ?? ''
-    const payload = { ...data, weather, recommended, grinder }
+    // 추천값 두 가지(날씨 기준값·화면에 보여 준 값)를 따로 저장. 계산 규칙은 grindCalc.js의 shotRecommendations
+    const { baseRecommended, recommended } = shotRecommendations({ data, editingShot, weather, shots, grind: settings.grind, roastDate, grinder })
+    const payload = { ...data, weather, baseRecommended, recommended, grinder }
     if (editingShot) {
       dispatch({ type: 'UPDATE_SHOT', payload: { ...payload, id: editingShot.id } })
       setEditingShot(null)

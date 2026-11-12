@@ -42,6 +42,14 @@ export default function GrindRecommendCard({ rec, beans, beanId, onBeanChange, b
         </ul>
       )}
 
+      {rec.logAdj && (
+        <p className="muted small">
+          {rec.logAdj.needed > 0
+            ? `매장 기록 보정: 목표 시간·도징에 맞게 나온 샷이 ${rec.logAdj.valid}개예요. ${rec.logAdj.needed}개 더 쌓이면 보정을 시작해요.`
+            : `매장 기록 보정: 잘 나온 샷 ${rec.logAdj.count}개로 보정 중`}
+        </p>
+      )}
+
       {adjust && (
         <p className="alert">
           🔔 {adjust.hour}시쯤 습도 {adjust.humidity}%·{adjust.temp}℃ 예상 → <strong>{adjust.value.toFixed(1)}</strong>로 조정 권장
