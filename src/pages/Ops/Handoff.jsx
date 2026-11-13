@@ -8,7 +8,8 @@ export default function Handoff({ compact = false }) {
   const { state, dispatch } = useApp()
   const { notes, staff } = state
   const [text, setText] = useState('')
-  const [showDone, setShowDone] = useState(false)
+  // 확인한 것도 기본으로 보여 줌: 체크하자마자 사라지면 잘못 누른 것을 알아차리기 어려움 (11-13 실사용자 피드백)
+  const [showDone, setShowDone] = useState(true)
   const [deleteId, setDeleteId] = useState(null)
   const sorted = [...notes].sort((a, b) => b.datetime.localeCompare(a.datetime))
   const open = sorted.filter((n) => !n.done)

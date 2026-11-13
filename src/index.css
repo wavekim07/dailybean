@@ -125,7 +125,7 @@ a { color: inherit; text-decoration: none; }
 .table th:first-child, .table td:first-child { text-align: left; }
 .table th { color: var(--muted); font-weight: 600; font-size: 12px; }
 .table tr.low td { background: #fdf1ef; }
-.tag.danger { background: #fbe1dd; color: var(--danger); margin-left: 6px; }
+.tag.danger { background: var(--danger); color: #fff; font-weight: 700; margin-left: 6px; }
 
 /* 분쇄도 */
 .weather-row { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-top: 6px; }
@@ -401,7 +401,7 @@ a.staff-chip { padding: 6px 12px; }
 .cal-nav .btn { padding: 4px 12px; }
 .cal { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 3px; margin: 10px 0 6px; }
 .cal-title { font-size: 15px; margin: 0; }
-.cal-week { background: #ece4d8; }
+.cal-cell.cal-week { background: #fff; border: 1px solid #c9d8ea; color: #2e6da4; } /* 주간 합계는 날짜 칸(갈색 계열)과 확실히 다른 색 */
 .cal-mark { font-style: normal; font-size: 10px; font-weight: 700; margin-left: 2px; }
 .cal-mark.hi { color: #c0392b; }
 .cal-mark.lo { color: #2e6da4; }
@@ -507,3 +507,5 @@ button.cal-cell { cursor: pointer; }
 
 /* 저장 실패 경고 (localStorage가 가득 찼을 때) */
 .save-error { position: sticky; top: 0; z-index: 20; background: #fff1f0; border: 1px solid #f3b8b2; border-radius: 10px; padding: 10px 12px; margin-bottom: 12px; }
+.admin-banner { position: sticky; top: 0; z-index: 19; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; background: #33261d; color: #fff; border-radius: 10px; padding: 10px 12px; margin: 0 0 12px; font-size: 14px; }
+.admin-banner .btn { padding: 4px 12px; font-size: 13px; }
