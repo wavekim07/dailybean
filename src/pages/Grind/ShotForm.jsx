@@ -36,8 +36,9 @@ export default function ShotForm({ beans, defaultBeanId, suggestedGrind, editing
     e.preventDefault()
     const nums = { grind: Math.round(Number(form.grind) * 100) / 100, dose: Number(form.dose), time: Number(form.time), yield: Number(form.yield) }
     if (!form.beanId) return setError('원두를 선택해 주세요.')
-    if (Object.values(nums).some((n) => Number.isNaN(n) || n <= 0)) return setError('분쇄도·도징·추출 시간·추출량을 숫자로 입력해 주세요.')
-    if (nums.grind < 1 || nums.grind > 15) return setError('분쇄도 값이 너무 커요/작아요. 다이얼 숫자를 확인해 주세요.')
+    // 분쇄도는 0도 있을 수 있음 (예: Mahlkönig E80S는 0~10 눈금, 0이 가장 가늘게). 나머지 값은 0보다 커야 함
+    if (form.grind === '' || Object.values(nums).some(Number.isNaN) || [nums.dose, nums.time, nums.yield].some((n) => n <= 0)) return setError('분쇄도·도징·추출 시간·추출량을 숫자로 입력해 주세요.')
+    if (nums.grind < 0 || nums.grind > 15) return setError('분쇄도 값이 너무 커요/작아요. 다이얼 숫자를 확인해 주세요.')
     if (nums.time > 90) return setError('추출 시간은 초 단위로 입력해 주세요.')
 
     const taste = hasTaste(form.taste) ? form.taste : null
