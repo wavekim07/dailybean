@@ -244,6 +244,8 @@ function BackupPanel({ state, dispatch }) {
     <div className="card form">
       <h2>데이터 관리</h2>
       <p className="muted">데이터는 이 기기 브라우저에만 저장돼요. 기기를 바꿀 땐 백업 파일로 옮기세요.</p>
+      {/* 사파리(WebKit)는 사이트를 7일 동안 열지 않으면 브라우저에 저장한 데이터를 지울 수 있음 */}
+      <p className="muted small">아이폰·아이패드 사파리는 7일 동안 이 사이트를 열지 않으면 저장된 데이터를 지울 수 있어요. 주기적으로 백업해 두세요.</p>
       <div className="actions" style={{ justifyContent: 'flex-start' }}>
         <button className="btn" onClick={exportJson}>백업 내보내기</button>
         <button className="btn" onClick={() => fileRef.current.click()}>백업 불러오기</button>
