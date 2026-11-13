@@ -1,6 +1,6 @@
 // 분쇄도 추천 계산 테스트 (기준값은 파도김 매장 기본 설정)
 import { describe, it, expect } from 'vitest'
-import { baseOf, calcGrind, judgeTime, learnOptsOf, logAdjustment, shotRecommendations } from '../src/utils/grindCalc.js'
+import { baseOf, calcGrind, judgeTime, learnOptsOf, logAdjustment, sameGrinderOf, shotRecommendations } from '../src/utils/grindCalc.js'
 import { initialState } from '../src/context/initialState.js'
 
 const g = initialState.settings.grind // 기준 6.5, 습도 60%, 기온 20℃, 범위 6.0~7.0
@@ -115,6 +115,44 @@ describe('샷 저장 시 추천값 두 가지', () => {
 
   it('날씨를 못 불러오면 두 값 모두 비워 둠 (보정 학습에서도 빠짐)', () => {
     expect(shotRecommendations({ data, weather: null, shots: past, grind: g })).toEqual({ baseRecommended: null, recommended: null })
+  })
+})
+
+describe('학습 데이터 검사 (11-13 GPT 검토 반영)', () => {
+  const opts = learnOptsOf(g)
+  const shot = (h, extra) => ({ beanId: 'b', datetime: `2026-11-08T1${h}:00`, time: 28, dose: 19, grind: 6.7, baseRecommended: 6.5, ...extra })
+
+  it('도징·분쇄도·시간·추천값이 숫자가 아니면 학습하지 않음 (백업 파일의 잘못된 값)', () => {
+    const bad = [shot(3, { dose: 'abc' }), shot(4, { grind: 'x' }), shot(5, { time: '이십팔' }), shot(6, { baseRecommended: 'n' })]
+    expect(logAdjustment([shot(0), shot(1), ...bad], 'b', opts)).toMatchObject({ value: 0, valid: 2, needed: 1 })
+  })
+
+  it('숫자가 글자로 저장돼 있어도(예: "19") 올바른 숫자면 학습함', () => {
+    const shots = [0, 1, 2].map((h) => shot(h, { dose: '19', grind: '6.7', time: '28' }))
+    expect(logAdjustment(shots, 'b', opts).value).toBeCloseTo(0.2)
+  })
+
+  it('매장 그라인더가 정해져 있으면 다른 그라인더·그라인더가 비어 있는 기록은 빼고, 정하지 않았으면 모두 씀', () => {
+    const shots = [shot(0, { grinder: 'EK43' }), shot(1, { grinder: '' }), shot(2, {}), shot(3, { grinder: 'Mythos' })]
+    expect(sameGrinderOf(shots, 'EK43')).toHaveLength(1)
+    expect(sameGrinderOf(shots, '')).toHaveLength(4)
+  })
+
+  it('샷을 저장할 때도 그라인더가 비어 있는 예전 기록으로는 보정하지 않음', () => {
+    const w = { humidity: 60, temp: 20 }
+    const past = [0, 1, 2].map((h) => ({ ...shot(h), id: `s${h}`, grinder: '' }))
+    const data = { beanId: 'b', datetime: '2026-11-09T10:00' }
+    expect(shotRecommendations({ data, weather: w, shots: past, grind: g, grinder: 'EK43' }).recommended).toBe(6.5)
+    expect(shotRecommendations({ data, weather: w, shots: past, grind: g, grinder: '' }).recommended).toBe(6.7)
+  })
+
+  it('과거 샷을 고칠 때 원두를 바꾸면 당시 값을 유지하지 않고 다시 계산함', () => {
+    const w = { humidity: 60, temp: 20 }
+    const editingShot = { id: 'x', beanId: 'b', datetime: '2026-11-09T10:00', baseRecommended: 6.2, recommended: 6.3 }
+    expect(shotRecommendations({ data: { beanId: 'b', datetime: '2026-11-09T10:00' }, editingShot, weather: w, shots: [], grind: g }))
+      .toEqual({ baseRecommended: 6.2, recommended: 6.3 })
+    expect(shotRecommendations({ data: { beanId: 'other', datetime: '2026-11-09T10:00' }, editingShot, weather: w, shots: [], grind: g }))
+      .toEqual({ baseRecommended: 6.5, recommended: 6.5 })
   })
 })
 

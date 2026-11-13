@@ -17,11 +17,17 @@ export function latestRoastDate(stockIns, beanId) {
 export const baseOf = (s) => s.baseRecommended ?? s.recommended
 
 export function isLearnable(s, { targetTime = null, targetDose = null, doseTol = 0.2 } = {}) {
-  if (baseOf(s) == null || s.grind == null) return false
-  if (targetTime && !(Number(s.time) >= targetTime[0] && Number(s.time) <= targetTime[1])) return false
-  if (targetDose != null && (s.dose == null || s.dose === '' || Math.abs(Number(s.dose) - Number(targetDose)) > doseTol + 1e-9)) return false
+  // 숫자가 아닌 값(빈칸, 글자, 백업 파일의 잘못된 값)은 배우지 않음
+  const num = (v) => (v === '' || v == null ? NaN : Number(v))
+  if (!Number.isFinite(num(baseOf(s))) || !Number.isFinite(num(s.grind))) return false
+  if (targetTime && !(num(s.time) >= targetTime[0] && num(s.time) <= targetTime[1])) return false
+  if (targetDose != null && !(Math.abs(num(s.dose) - Number(targetDose)) <= doseTol + 1e-9)) return false
   return true
 }
+
+// 같은 그라인더 기록만: 매장 그라인더가 정해져 있으면 그라인더가 비어 있는(확인되지 않은) 기록은 빼고,
+// 아직 정하지 않았으면 모두 씀
+export const sameGrinderOf = (shots, grinder) => (grinder ? shots.filter((s) => s.grinder === grinder) : shots)
 
 export function logAdjustment(shots, beanId, { targetTime = null, targetDose = null, doseTol = 0.2, minCount = 3 } = {}) {
   const valid = shots
@@ -29,7 +35,7 @@ export function logAdjustment(shots, beanId, { targetTime = null, targetDose = n
     .sort((a, b) => b.datetime.localeCompare(a.datetime))
     .slice(0, 10)
   if (valid.length < minCount) return { value: 0, count: 0, valid: valid.length, needed: minCount - valid.length }
-  const avg = valid.reduce((sum, x) => sum + (x.grind - baseOf(x)), 0) / valid.length
+  const avg = valid.reduce((sum, x) => sum + (Number(x.grind) - Number(baseOf(x))), 0) / valid.length
   return { value: clamp(avg, -0.3, 0.3), count: valid.length, valid: valid.length, needed: 0 }
 }
 
@@ -39,15 +45,15 @@ export const learnOptsOf = (g) => ({ targetTime: g.targetTime ?? null, targetDos
 // 샷을 저장할 때 남길 추천값 두 가지
 //  - baseRecommended: 그 시각 날씨·원두 숙성만 반영한 값 (기록 보정이 이 값과의 차이를 배움)
 //  - recommended: 기록 보정까지 더해 화면에 보여 준 최종 추천값 (추천 vs 실제 비교용)
-// 기존 샷을 고칠 때 날짜·시각이 그대로면 당시 두 값을 그대로 유지 (지금 설정·기록으로 다시 계산하지 않음)
-// 날짜·시각을 고치면 날씨도 새로 가져오므로, 그 시각 기준으로 다시 계산
+// 기존 샷을 고칠 때 날짜·시각과 원두가 그대로면 당시 두 값을 그대로 유지 (지금 설정·기록으로 다시 계산하지 않음)
+// 날짜·시각을 고치면 날씨가, 원두를 바꾸면 숙성일이 달라지므로 그 기준으로 다시 계산
 export function shotRecommendations({ data, editingShot = null, weather, shots = [], grind, roastDate = null, grinder = '' }) {
-  if (editingShot && editingShot.datetime === data.datetime && editingShot.recommended != null) {
+  if (editingShot && editingShot.datetime === data.datetime && editingShot.beanId === data.beanId && editingShot.recommended != null) {
     return { baseRecommended: editingShot.baseRecommended ?? editingShot.recommended, recommended: editingShot.recommended }
   }
   if (!weather) return { baseRecommended: null, recommended: null }
   // 이 샷보다 앞선, 같은 그라인더의 다른 샷만 보정에 씀 (자기 자신이나 나중 기록을 배우지 않게)
-  const others = shots.filter((s) => s.id !== editingShot?.id && s.datetime < data.datetime && (!s.grinder || !grinder || s.grinder === grinder))
+  const others = sameGrinderOf(shots, grinder).filter((s) => s.id !== editingShot?.id && s.datetime < data.datetime)
   const logAdj = logAdjustment(others, data.beanId, learnOptsOf(grind))
   const opts = { roastDate, onDate: data.datetime.slice(0, 10) }
   return { baseRecommended: calcGrind(weather, grind, opts).value, recommended: calcGrind(weather, grind, { ...opts, logAdj }).value }
